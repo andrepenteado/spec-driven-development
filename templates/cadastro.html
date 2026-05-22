@@ -1,0 +1,199 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Cadastro de colaborador</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css">
+  <link rel="stylesheet" href="assets/crud-layouts.css">
+</head>
+<body>
+  <nav aria-label="breadcrumb">
+    <ol class="breadcrumb mb-0">
+      <li class="breadcrumb-item"><a routerLink="/pagina-inicial"><i class="fa-solid fa-house"></i></a></li>
+      <li class="breadcrumb-item"><a routerLink="/colaborador/pesquisar">Colaboradores</a></li>
+      <li class="breadcrumb-item active">Cadastro</li>
+    </ol>
+  </nav>
+
+  <main class="container-xxl py-4">
+    <section class="row g-3 align-items-start mb-4">
+      <header class="col-12 col-lg">
+        <span class="kicker"><i class="fa-solid fa-user-pen"></i> Cadastro</span>
+        <h1 class="display-6 fw-bold mb-2">Editar colaborador</h1>
+        <p class="text-secondary mb-0">Cadastro em abas independentes, com dados cadastrais separados de contatos.</p>
+      </header>
+
+      <div class="col-12 col-lg-4 d-none d-md-block">
+        <aside class="card flat-card audit-card">
+          <div class="card-body d-flex align-items-start gap-3">
+            <span class="summary-icon"><i class="fa-solid fa-clock-rotate-left"></i></span>
+            <div class="min-w-0">
+              <span class="summary-label">Registro</span>
+              <div class="small text-secondary mt-1">
+                <strong class="text-body">Criado por:</strong> admin@apcode.com.br<br>
+                <strong class="text-body">Criado em:</strong> 02/05/2026 às 09:20<br>
+                <strong class="text-body">Alterado por:</strong> marina@apcode.com.br<br>
+                <strong class="text-body">Alterado em:</strong> 14/05/2026 às 11:10
+              </div>
+            </div>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    <ul class="nav nav-pills gap-2 mb-3" id="cadastroTabs" role="tablist">
+      <li class="nav-item" role="presentation">
+        <button class="nav-link active rounded-pill px-3" id="dados-tab" data-bs-toggle="tab" data-bs-target="#dados-tab-pane" type="button" role="tab" aria-controls="dados-tab-pane" aria-selected="true">
+          <i class="fa-solid fa-user me-2"></i>Dados cadastrais
+        </button>
+      </li>
+      <li class="nav-item" role="presentation">
+        <button class="nav-link rounded-pill px-3" id="contatos-tab" data-bs-toggle="tab" data-bs-target="#contatos-tab-pane" type="button" role="tab" aria-controls="contatos-tab-pane" aria-selected="false">
+          <i class="fa-solid fa-address-book me-2"></i>Contatos
+        </button>
+      </li>
+    </ul>
+
+    <div class="tab-content">
+      <section class="tab-pane fade show active" id="dados-tab-pane" role="tabpanel" aria-labelledby="dados-tab" tabindex="0">
+        <form>
+          <div class="card flat-card">
+            <div class="card-body p-4 p-lg-5">
+              <div class="section-heading mb-4">
+                <span class="section-icon"><i class="fa-solid fa-id-card"></i></span>
+                <div>
+                  <h2 class="h5 fw-bold mb-1">Dados principais</h2>
+                  <p class="text-secondary mb-0">Identificação, vínculo organizacional e contato base.</p>
+                </div>
+              </div>
+
+              <div class="row g-3 mb-4">
+                <div class="col-12 col-lg-7">
+                  <label class="form-label fw-semibold required-label">Nome <i class="fa-solid fa-circle-exclamation help-dot" title="Campo obrigatório"></i></label>
+                  <div class="input-group"><span class="input-group-text"><i class="fa-solid fa-user"></i></span><input class="form-control" value="Ana Beatriz Lima"></div>
+                </div>
+                <div class="col-12 col-lg-5">
+                  <label class="form-label fw-semibold required-label">CPF <i class="fa-solid fa-circle-exclamation help-dot" title="Campo obrigatório"></i></label>
+                  <div class="input-group"><span class="input-group-text"><i class="fa-solid fa-address-card"></i></span><input class="form-control" value="123.456.789-00"></div>
+                </div>
+                <div class="col-12 col-md-6">
+                  <label class="form-label fw-semibold required-label">Empresa <i class="fa-solid fa-circle-exclamation help-dot" title="Campo obrigatório"></i></label>
+                  <select class="form-select"><option>APCode</option><option>APS Soluções</option></select>
+                </div>
+                <div class="col-12 col-md-6">
+                  <label class="form-label fw-semibold required-label">Cargo <i class="fa-solid fa-circle-exclamation help-dot" title="Campo obrigatório"></i></label>
+                  <select class="form-select"><option>Analista de sistemas</option><option>Gerente</option></select>
+                </div>
+                <div class="col-12 col-md-5">
+                  <label class="form-label fw-semibold required-label">Telefone <i class="fa-solid fa-circle-exclamation help-dot" title="Campo obrigatório"></i></label>
+                  <input class="form-control" value="(11) 98888-1200">
+                </div>
+                <div class="col-12 col-md-7">
+                  <label class="form-label fw-semibold">E-mail</label>
+                  <input class="form-control" value="ana.lima@apcode.com.br">
+                </div>
+              </div>
+
+              <hr class="my-4">
+
+              <div class="section-heading mb-4">
+                <span class="section-icon"><i class="fa-solid fa-location-dot"></i></span>
+                <div>
+                  <h2 class="h5 fw-bold mb-1">Endereço</h2>
+                  <p class="text-secondary mb-0">Campos em largura confortável, com logradouro e complemento sem aperto lateral.</p>
+                </div>
+              </div>
+
+              <div class="row g-3">
+                <div class="col-12 col-md-4">
+                  <label class="form-label fw-semibold">CEP</label>
+                  <div class="input-group"><span class="input-group-text"><i class="fa-solid fa-magnifying-glass"></i></span><input class="form-control" value="01001-000"><button class="btn btn-outline-primary" type="button">Buscar</button></div>
+                </div>
+                <div class="col-12 col-md-8">
+                  <label class="form-label fw-semibold">Logradouro</label>
+                  <input class="form-control" value="Praça da Sé">
+                </div>
+                <div class="col-12 col-md-3">
+                  <label class="form-label fw-semibold">Número</label>
+                  <input class="form-control" value="120">
+                </div>
+                <div class="col-12 col-md-5">
+                  <label class="form-label fw-semibold">Complemento</label>
+                  <input class="form-control" value="Conjunto 81">
+                </div>
+                <div class="col-12 col-md-4">
+                  <label class="form-label fw-semibold">Bairro</label>
+                  <input class="form-control" value="Sé">
+                </div>
+                <div class="col-12 col-md-5">
+                  <label class="form-label fw-semibold">Cidade</label>
+                  <input class="form-control" value="São Paulo">
+                </div>
+                <div class="col-12 col-md-2">
+                  <label class="form-label fw-semibold">UF</label>
+                  <input class="form-control" value="SP">
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mt-3">
+            <span class="text-secondary small"><i class="fa-solid fa-circle-info me-1"></i>Campos em vermelho são obrigatórios.</span>
+            <div class="d-flex gap-2 justify-content-end">
+              <button class="btn btn-light" type="button">Cancelar</button>
+              <button class="btn btn-primary" type="button"><i class="fa-solid fa-floppy-disk me-2"></i>Gravar</button>
+            </div>
+          </div>
+        </form>
+      </section>
+
+      <section class="tab-pane fade" id="contatos-tab-pane" role="tabpanel" aria-labelledby="contatos-tab" tabindex="0">
+        <form>
+          <div class="card flat-card">
+            <div class="card-body p-4 p-lg-5">
+              <div class="section-heading mb-4">
+                <span class="section-icon"><i class="fa-solid fa-address-book"></i></span>
+                <div>
+                  <h2 class="h5 fw-bold mb-1">Contatos adicionais</h2>
+                  <p class="text-secondary mb-0">Informações independentes do formulário de dados cadastrais.</p>
+                </div>
+              </div>
+
+              <div class="row g-3">
+                <div class="col-12 col-md-6">
+                  <label class="form-label fw-semibold">Contato de emergência</label>
+                  <input class="form-control" value="Mariana Lima">
+                </div>
+                <div class="col-12 col-md-6">
+                  <label class="form-label fw-semibold">Telefone de emergência</label>
+                  <input class="form-control" value="(11) 95555-3300">
+                </div>
+                <div class="col-12 col-md-6">
+                  <label class="form-label fw-semibold">E-mail alternativo</label>
+                  <input class="form-control" value="ana.beatriz@gmail.com">
+                </div>
+                <div class="col-12 col-md-6">
+                  <label class="form-label fw-semibold">Ramal interno</label>
+                  <input class="form-control" value="204">
+                </div>
+                <div class="col-12">
+                  <label class="form-label fw-semibold">Observações de contato</label>
+                  <textarea class="form-control" rows="4">Preferência por contato via e-mail no período da manhã.</textarea>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="d-flex justify-content-end gap-2 mt-3">
+            <button class="btn btn-light" type="button">Cancelar</button>
+            <button class="btn btn-primary" type="button"><i class="fa-solid fa-floppy-disk me-2"></i>Gravar contatos</button>
+          </div>
+        </form>
+      </section>
+    </div>
+  </main>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
