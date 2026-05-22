@@ -16,8 +16,9 @@ Criar tela de cadastro Angular seguindo `.specs/templates/cadastro.html`.
 - Header em `section.row g-3 align-items-start mb-4`.
 - `kicker` com ícone e texto `Cadastro`.
 - Título: `Novo [label]` ou `Editar [label]`.
-- Card de auditoria à direita com `card flat-card audit-card d-none d-md-block`.
-- Não exibir auditoria em dispositivos pequenos.
+- Em modo de edição, exibir card de auditoria à direita com `card flat-card audit-card d-none d-md-block`.
+- Em modo de inclusão, não exibir o card de auditoria.
+- Não exibir auditoria em dispositivos pequenos, mesmo em modo de edição.
 - Abas arredondadas: `nav nav-pills`, `nav-link rounded-pill px-3`.
 - Primeira aba: `Dados cadastrais`.
 - Abas extras somente se YAML ou padrão real justificar.
@@ -58,7 +59,7 @@ Criar tela de cadastro Angular seguindo `.specs/templates/cadastro.html`.
 
 ## Critérios de aceite
 
-- Auditoria não é editável e não aparece em dispositivos pequenos.
+- Auditoria não é editável, aparece somente em modo de edição e não aparece em dispositivos pequenos.
 - Não há cards/forms lado a lado.
 - Botões finais são `Voltar` e `Gravar`.
 - Campos obrigatórios têm validação e linguagem visual do modelo.

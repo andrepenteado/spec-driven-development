@@ -2,7 +2,7 @@
 
 ## Validação antes de gerar
 
-- Escanear `.specs/cruds/*.yaml`, ignorando `*.generated.yaml`.
+- Escanear `.cruds/*.yaml`, ignorando `*.generated.yaml`.
 - Classificar cada YAML como `novo`, `existente`, `conflito` ou `invalido`.
 - Validar metadados obrigatórios, nomes, tipos, FKs, enums, pesquisa e layout.
 - Confirmar padrões reais do backend/frontend.
@@ -40,7 +40,7 @@
 
 ## Manifesto
 
-Criar `.specs/cruds/[nome-crud].generated.yaml` após sucesso, com checksum normalizado, data/hora, status e arquivos gerados.
+Criar `.cruds/[nome-crud].generated.yaml` após sucesso, com checksum normalizado, data/hora, status e arquivos gerados.
 
 ## Relatório final
 

@@ -6,7 +6,7 @@ Definir entrada de metadados para criação do CRUD.
 
 ## Local
 
-YAMLs de entrada ficam em `.specs/cruds/*.yaml`.
+YAMLs de entrada ficam em `.cruds/*.yaml`.
 
 ## Exemplo
 
@@ -77,11 +77,11 @@ tabela:
 
 ## Manifesto
 
-Após sucesso, criar `.specs/cruds/[nome-crud].generated.yaml`:
+Após sucesso, criar `.cruds/[nome-crud].generated.yaml`:
 
 ```yaml
 crud: marca
-metadados: .specs/cruds/marca.yaml
+metadados: .cruds/marca.yaml
 checksumNormalizado: "sha256:..."
 executadoEm: "YYYY-MM-DDTHH:mm:ss-03:00"
 status: criado

@@ -4,7 +4,7 @@ Use este arquivo como ponto de entrada. Leia as specs na ordem indicada antes de
 
 ## Objetivo
 
-Criar CRUDs novos a partir de YAMLs em `.specs/cruds/*.yaml`, usando Java 25, Spring Boot 4, PostgreSQL, Liquibase, QueryDSL e Angular 21.
+Criar CRUDs novos a partir de YAMLs em `.cruds/*.yaml`, usando Java 25, Spring Boot 4, PostgreSQL, Liquibase, QueryDSL e Angular 21.
 
 ## Ordem de leitura obrigatória
 
@@ -22,14 +22,14 @@ Criar CRUDs novos a partir de YAMLs em `.specs/cruds/*.yaml`, usando Java 25, Sp
 
 ## Fluxo obrigatório
 
-1. Escanear `.specs/cruds/*.yaml`, ignorando `*.generated.yaml`.
+1. Escanear `.cruds/*.yaml`, ignorando `*.generated.yaml`.
 2. Validar cada YAML conforme `01-yaml-contrato.md`.
 3. Inspecionar o projeto real e identificar padrões existentes.
 4. Apresentar relatório com status: `novo`, `existente`, `conflito` ou `invalido`.
 5. Perguntar explicitamente quais CRUDs novos executar.
 6. Alterar código somente após confirmação do usuário.
 7. Gerar backend, depois frontend.
-8. Criar `.specs/cruds/[nome-crud].generated.yaml` apenas após sucesso.
+8. Criar `.cruds/[nome-crud].generated.yaml` apenas após sucesso.
 9. Informar arquivos criados/alterados e validações executadas.
 
 ## Regras de precedência
