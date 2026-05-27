@@ -151,28 +151,68 @@ Use essa pasta para os YAMLs de entrada e para os manifestos gerados:
 
 ### 5. Enviar mudanças para o repositório de specs
 
-Por padrão, **não altere os arquivos compartilhados da spec diretamente no projeto consumidor**.
+Mudanças na spec podem ser detectadas durante o trabalho em um projeto consumidor. Nesse caso, elas podem ser feitas em `.specs/`, desde que sejam isoladas das alterações do código do produto e depois promovidas para este repositório com `git subtree push`.
 
-Se uma mudança na spec for necessária, prefira alterar este repositório diretamente, revisar, versionar e depois atualizar os projetos consumidores com `git subtree pull`.
-
-Se, excepcionalmente, uma mudança for feita dentro de `.specs/` no projeto consumidor e precisar voltar para este repositório, use:
+Quando o projeto consumidor tiver alterações tanto no código do produto quanto em `.specs/`, primeiro commite somente o código do consumidor:
 
 ```bash
+git status
+git add . ':!.specs/**'
+git diff --cached --name-only
+git commit -m "feat: ajustes no projeto consumidor"
+```
+
+Depois commite somente as alterações da spec dentro do próprio projeto consumidor:
+
+```bash
+git status --short
+git add .specs
+git diff --cached --name-only
+git commit -m "chore(specs): atualiza especificacoes compartilhadas"
+```
+
+Atualize a referência do repositório de specs e envie o conteúdo de `.specs/` para este repositório:
+
+```bash
+git fetch spec-driven-development
 git subtree push --prefix=.specs spec-driven-development main
 ```
 
-Use esse fluxo com cuidado. Antes de executar `subtree push`, revise se a pasta `.specs/` contém somente mudanças que realmente pertencem à spec compartilhada.
+Por fim, envie também o histórico do projeto consumidor para o repositório remoto dele:
+
+```bash
+git push
+```
+
+Se o `subtree push` falhar porque a branch `main` deste repositório recebeu mudanças novas, atualize o subtree no projeto consumidor, resolva conflitos se houver, commite e tente o push novamente:
+
+```bash
+git subtree pull --prefix=.specs spec-driven-development main --squash
+git add .specs
+git commit
+git subtree push --prefix=.specs spec-driven-development main
+```
+
+Depois que o `subtree push` for concluído, atualize o clone local deste repositório:
+
+```bash
+cd /caminho/para/spec-driven-development
+git pull origin main
+```
+
+Antes de executar `subtree push`, revise se a pasta `.specs/` contém somente mudanças que realmente pertencem à spec compartilhada. YAMLs operacionais, regras específicas de negócio do consumidor e documentação própria do produto não devem ser promovidos para este repositório.
 
 ## Regras para projetos consumidores
 
-- Não editar localmente os arquivos compartilhados da spec em `.specs/*.md` e `.specs/templates/`.
-- Não adaptar a spec silenciosamente em um único projeto consumidor; mudanças de padrão devem nascer neste repositório.
+- Alterações em `.specs/*.md` e `.specs/templates/` podem ser feitas no projeto consumidor quando forem necessárias para corrigir ou evoluir a spec durante o uso real.
+- Mudanças de spec feitas no consumidor devem ser commitadas separadamente das mudanças do produto e promovidas para este repositório com `git subtree push`.
+- Não adaptar a spec silenciosamente em um único projeto consumidor; se a regra é compartilhada, ela deve voltar para este repositório.
 - Atualizar a spec nos projetos consumidores com `git subtree pull`, não copiando arquivos manualmente.
 - Manter a documentação específica do produto no `README.md` do projeto consumidor.
 - Usar `.cruds/*.yaml` para os YAMLs operacionais do projeto consumidor, quando a geração de CRUD for necessária.
 - Tratar `.cruds/*.generated.yaml` como manifesto daquilo que já foi gerado.
 - Não colocar YAMLs operacionais em `.specs/`, porque essa pasta pertence ao subtree da spec compartilhada.
-- Antes de atualizar a spec via subtree, garantir que não existam edições locais conflitantes dentro de `.specs/`.
+- Antes de atualizar a spec via `git subtree pull`, garantir que mudanças locais em `.specs/` já foram commitadas, descartadas ou promovidas para este repositório.
 - Se um projeto consumidor precisar divergir da spec, documentar a exceção no próprio projeto e avaliar se a regra deveria virar uma variação oficial deste repositório.
 
 ## Como usar em um projeto consumidor
