@@ -43,7 +43,10 @@ Criar tela de cadastro Angular seguindo `.specs/templates/cadastro.html`.
 - Além do label em vermelho, campos obrigatórios devem exibir o ícone `fa-circle-exclamation help-dot` também em vermelho.
 - Inputs com ícone usam `input-group` e `input-group-text` quando fizer sentido.
 - `mask` aplica atributo `mask`.
-- `fk` usa `ng-select` com service da entidade referenciada e `fk-display`.
+- `fk` usa `ng-select` com service da entidade referenciada, `fk-display` e `class="ng-select-bootstrap"`.
+- FK com ícone pode encapsular `ng-select` em `input-group`, usando `input-group-text` antes do componente.
+- Não criar wrappers próprios para `ng-select` sem necessidade; priorizar `input-group` Bootstrap quando houver ícone.
+- Não alimentar `[items]` do `ng-select` com getter que recria arrays a cada detecção de mudança; usar propriedade estável e atualizá-la quando a lista base ou o registro atual mudar.
 - `enum` usa radio buttons com labels.
 - `boolean` usa checkbox/toggle.
 - Textarea e campos longos ocupam `col-12`.

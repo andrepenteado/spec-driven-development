@@ -34,7 +34,7 @@ Criar tela de pesquisa Angular seguindo `.specs/templates/pesquisar.html`.
 - Botões de pesquisar e limpar nos filtros devem ser icon-only, com `title` e `aria-label`; não incluir texto visível.
 - Texto: input texto.
 - Enum: combo/select com labels.
-- FK: `ng-select`.
+- FK: `ng-select` com `class="ng-select-bootstrap"` para receber o tema global Bootstrap-like do projeto.
 - Boolean/date/datetime/number: controle compatível.
 - Pesquisa sem filtro preenchido: toastr `Informe ao menos um filtro para pesquisar.`
 

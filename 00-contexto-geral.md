@@ -25,6 +25,7 @@ Definir regras globais para geração de CRUD.
 - Preferir classes utilitárias e componentes do Bootstrap 5 para decoração e layout.
 - Usar CSS customizado somente quando Bootstrap 5 não atender de forma simples.
 - CSS compartilhado criado para CRUDs deve ficar no CSS global do projeto (`frontend/src/styles.css`), nunca referenciar ou importar CSS de `.specs/templates/assets` no código gerado.
+- Estilos globais do projeto (`frontend/src/styles.css`) devem ser carregados depois dos CSS de bibliotecas no `angular.json`, para sobrescrever ajustes visuais de Bootstrap, DataTables e ng-select quando necessário.
 - Tratamento global de erros HTTP pertence à lib Angular via `provideApcoreHttpInterceptors()`/`HttpErrorsInterceptor`. Componentes de CRUD não devem duplicar mensagens ou navegações para erros 400, 401, 403, 404, 409, 422 ou 500; em callbacks de erro, cuidar apenas de estado local, como parar loader.
 - Mensagens devem usar `tabela.label`, não termos genéricos como "Registro".
 - Concordância: labels terminados em "a" usam feminino; demais usam masculino.
