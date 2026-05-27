@@ -7,7 +7,6 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdn.datatables.net/2.3.4/css/dataTables.bootstrap5.min.css" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css">
-  <link rel="stylesheet" href="assets/crud-layouts.css">
 </head>
 <body>
   <ngx-ui-loader
@@ -19,14 +18,14 @@
     [hasProgressBar]="true">
   </ngx-ui-loader>
 
-  <nav aria-label="breadcrumb">
+  <nav aria-label="breadcrumb" class="mb-4">
     <ol class="breadcrumb mb-0">
-      <li class="breadcrumb-item"><a routerLink="/pagina-inicial"><i class="fa-solid fa-house"></i></a></li>
+      <li class="breadcrumb-item"><a routerLink="/pagina-inicial"><i class="fa-solid fa-house me-1"></i>Início</a></li>
       <li class="breadcrumb-item active">Colaboradores</li>
     </ol>
   </nav>
 
-  <main class="container-xxl py-4">
+  <section class="container py-3">
     <header class="d-flex flex-column flex-md-row justify-content-between gap-3 align-items-md-end mb-4">
       <div>
         <span class="kicker"><i class="fa-solid fa-table-list"></i> Pesquisa</span>
@@ -38,68 +37,60 @@
 
     <section class="row g-3 mb-4" aria-label="Resumo de colaboradores">
       <div class="col-12 col-md-4">
-        <article class="card flat-card h-100">
+        <article class="card h-100">
           <div class="card-body d-flex align-items-center gap-3">
-            <span class="summary-icon"><i class="fa-solid fa-user-group"></i></span>
+            <span class="d-inline-flex align-items-center justify-content-center rounded bg-primary-subtle text-primary p-2"><i class="fa-solid fa-user-group"></i></span>
             <div><span class="summary-label">Colaboradores</span><strong class="summary-value">128</strong></div>
           </div>
         </article>
       </div>
       <div class="col-12 col-md-4">
-        <article class="card flat-card h-100">
+        <article class="card h-100">
           <div class="card-body d-flex align-items-center gap-3">
-            <span class="summary-icon"><i class="fa-solid fa-briefcase"></i></span>
+            <span class="d-inline-flex align-items-center justify-content-center rounded bg-primary-subtle text-primary p-2"><i class="fa-solid fa-briefcase"></i></span>
             <div><span class="summary-label">Cargos</span><strong class="summary-value">18</strong></div>
           </div>
         </article>
       </div>
       <div class="col-12 col-md-4">
-        <article class="card flat-card h-100">
+        <article class="card h-100">
           <div class="card-body d-flex align-items-center gap-3">
-            <span class="summary-icon"><i class="fa-solid fa-city"></i></span>
+            <span class="d-inline-flex align-items-center justify-content-center rounded bg-primary-subtle text-primary p-2"><i class="fa-solid fa-city"></i></span>
             <div><span class="summary-label">Cidades</span><strong class="summary-value">24</strong></div>
           </div>
         </article>
       </div>
     </section>
 
-    <section class="card flat-card">
+    <section class="card">
       <div class="card-header bg-body border-bottom p-4">
         <div class="d-flex flex-column flex-md-row justify-content-between gap-3 align-items-md-center">
-          <div class="section-heading">
-            <span class="section-icon"><i class="fa-solid fa-table-list"></i></span>
-            <div>
-              <h2 class="h5 fw-bold mb-1">Consulta de colaboradores</h2>
-              <p class="text-secondary mb-0">Filtros por dados cadastrais antes do DataTables.</p>
-            </div>
-          </div>
           <button class="btn btn-outline-primary rounded-pill px-3 mobile-full filter-toggle" type="button" data-bs-toggle="collapse" data-bs-target="#filtrosPesquisa" aria-expanded="false" aria-controls="filtrosPesquisa">
-            <i class="fa-solid fa-filter me-2"></i>Filtros
+            <i class="fa-solid fa-filter me-2"></i>Filtrar Pesquisa
           </button>
         </div>
       </div>
 
       <div class="card-body p-4">
         <div class="collapse filters-collapse" id="filtrosPesquisa">
-          <form class="row g-3 align-items-end filter-box mb-4">
-            <div class="col-12 col-lg">
-              <label class="form-label">Busca textual</label>
-              <input class="form-control" placeholder="Nome, e-mail, CPF, ID">
+          <form class="row g-2 align-items-center border rounded bg-body-tertiary p-3 mb-4">
+            <div class="col-12 col-md">
+              <input class="form-control" placeholder="Nome, e-mail, CPF, ID" aria-label="Busca textual">
             </div>
-            <div class="col-12 col-md-4 col-lg-2">
-              <label class="form-label">Empresa</label>
-              <select class="form-select"><option>Todas</option><option>APCode</option><option>APS Soluções</option></select>
+            <div class="col-12 col-md">
+              <select class="form-select" aria-label="Empresa"><option>Empresa</option><option>APCode</option><option>APS Soluções</option></select>
             </div>
-            <div class="col-12 col-md-4 col-lg-2">
-              <label class="form-label">Cargo</label>
-              <select class="form-select"><option>Todos</option><option>Analista</option><option>Gerente</option></select>
+            <div class="col-12 col-md">
+              <select class="form-select" aria-label="Cargo"><option>Cargo</option><option>Analista</option><option>Gerente</option></select>
             </div>
-            <div class="col-12 col-md-4 col-lg-2">
-              <label class="form-label">UF</label>
-              <select class="form-select"><option>Todas</option><option>SP</option><option>RJ</option><option>MG</option></select>
+            <div class="col-12 col-md">
+              <select class="form-select" aria-label="UF"><option>UF</option><option>SP</option><option>RJ</option><option>MG</option></select>
             </div>
-            <div class="col-12 col-lg-auto">
-              <button class="btn btn-primary w-100" type="button" title="Filtrar"><i class="fa-solid fa-filter"></i></button>
+            <div class="col-6 col-md-auto">
+              <button class="btn btn-primary w-100" type="button" title="Pesquisar" aria-label="Pesquisar"><i class="fa-solid fa-magnifying-glass"></i></button>
+            </div>
+            <div class="col-6 col-md-auto">
+              <button class="btn btn-outline-secondary w-100" type="button" title="Limpar filtros" aria-label="Limpar filtros"><i class="fa-solid fa-eraser"></i></button>
             </div>
           </form>
         </div>
@@ -109,6 +100,7 @@
             <thead>
               <tr>
                 <th>Ações</th>
+                <th>ID</th>
                 <th>Colaborador</th>
                 <th>Documento</th>
                 <th>Empresa</th>
@@ -119,7 +111,8 @@
             <tbody>
               <tr>
                 <td><div class="action-stack"><a class="btn btn-outline-primary btn-sm" href="cadastro.html" title="Editar"><i class="fa-solid fa-pen-to-square"></i></a><button class="btn btn-outline-danger btn-sm" title="Excluir"><i class="fa-solid fa-trash-can"></i></button></div></td>
-                <td><div class="record-cell"><span class="record-avatar"><i class="fa-solid fa-user"></i></span><div><span class="record-main">Ana Beatriz Lima</span><span class="record-sub">ana.lima@apcode.com.br</span></div></div></td>
+                <td>1012</td>
+                <td><div class="d-flex align-items-center gap-2"><span class="d-inline-flex align-items-center justify-content-center rounded bg-primary-subtle text-primary p-2"><i class="fa-solid fa-user"></i></span><div><span class="record-main">Ana Beatriz Lima</span><span class="record-sub">ana.lima@apcode.com.br</span></div></div></td>
                 <td>123.456.789-00</td>
                 <td>APCode</td>
                 <td>Analista de sistemas</td>
@@ -127,7 +120,8 @@
               </tr>
               <tr>
                 <td><div class="action-stack"><a class="btn btn-outline-primary btn-sm" href="cadastro.html" title="Editar"><i class="fa-solid fa-pen-to-square"></i></a><button class="btn btn-outline-danger btn-sm" title="Excluir"><i class="fa-solid fa-trash-can"></i></button></div></td>
-                <td><div class="record-cell"><span class="record-avatar"><i class="fa-solid fa-user"></i></span><div><span class="record-main">Bruno Carvalho Reis</span><span class="record-sub">bruno.reis@apcode.com.br</span></div></div></td>
+                <td>1018</td>
+                <td><div class="d-flex align-items-center gap-2"><span class="d-inline-flex align-items-center justify-content-center rounded bg-primary-subtle text-primary p-2"><i class="fa-solid fa-user"></i></span><div><span class="record-main">Bruno Carvalho Reis</span><span class="record-sub">bruno.reis@apcode.com.br</span></div></div></td>
                 <td>987.654.321-00</td>
                 <td>APS Soluções</td>
                 <td>Gerente de produto</td>
@@ -135,7 +129,8 @@
               </tr>
               <tr>
                 <td><div class="action-stack"><a class="btn btn-outline-primary btn-sm" href="cadastro.html" title="Editar"><i class="fa-solid fa-pen-to-square"></i></a><button class="btn btn-outline-danger btn-sm" title="Excluir"><i class="fa-solid fa-trash-can"></i></button></div></td>
-                <td><div class="record-cell"><span class="record-avatar"><i class="fa-solid fa-user"></i></span><div><span class="record-main">Camila Nunes</span><span class="record-sub">camila.nunes@apcode.com.br</span></div></div></td>
+                <td>1031</td>
+                <td><div class="d-flex align-items-center gap-2"><span class="d-inline-flex align-items-center justify-content-center rounded bg-primary-subtle text-primary p-2"><i class="fa-solid fa-user"></i></span><div><span class="record-main">Camila Nunes</span><span class="record-sub">camila.nunes@apcode.com.br</span></div></div></td>
                 <td>456.123.789-00</td>
                 <td>APCode</td>
                 <td>Financeiro</td>
@@ -143,7 +138,8 @@
               </tr>
               <tr>
                 <td><div class="action-stack"><a class="btn btn-outline-primary btn-sm" href="cadastro.html" title="Editar"><i class="fa-solid fa-pen-to-square"></i></a><button class="btn btn-outline-danger btn-sm" title="Excluir"><i class="fa-solid fa-trash-can"></i></button></div></td>
-                <td><div class="record-cell"><span class="record-avatar"><i class="fa-solid fa-user"></i></span><div><span class="record-main">Diego Martins</span><span class="record-sub">ID 1048</span></div></div></td>
+                <td>1048</td>
+                <td><div class="d-flex align-items-center gap-2"><span class="d-inline-flex align-items-center justify-content-center rounded bg-primary-subtle text-primary p-2"><i class="fa-solid fa-user"></i></span><div><span class="record-main">Diego Martins</span><span class="record-sub">Suporte</span></div></div></td>
                 <td>222.333.444-55</td>
                 <td>APCode</td>
                 <td>Suporte</td>
@@ -154,7 +150,7 @@
         </div>
       </div>
     </section>
-  </main>
+  </section>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
   <script src="https://cdn.datatables.net/2.3.4/js/dataTables.min.js"></script>
   <script src="https://cdn.datatables.net/2.3.4/js/dataTables.bootstrap5.min.js"></script>

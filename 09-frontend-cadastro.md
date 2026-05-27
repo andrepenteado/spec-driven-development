@@ -12,25 +12,35 @@ Criar tela de cadastro Angular seguindo `.specs/templates/cadastro.html`.
 ## Estrutura visual
 
 - O template Angular omite `<html>`, `<head>`, `<body>`, CDNs e scripts.
-- Breadcrumb: home `/pagina-inicial` > `tabela.plural` apontando para pesquisa > `Cadastro`.
+- Usar sintaxe moderna de blocos Angular (`@if`, `@for`) em vez de `*ngIf` e `*ngFor`.
+- Usar ao máximo classes Bootstrap 5; CSS customizado deve ser mínimo e ficar em `frontend/src/styles.css`.
+- Não importar nem referenciar CSS de `.specs/templates/assets` em arquivos Angular gerados.
+- Renderizar o breadcrumb fora do container principal.
+- O breadcrumb deve iniciar com link para `/pagina-inicial` contendo ícone FontAwesome `fa-house` antes do texto `Início`, seguido de `tabela.plural` apontando para pesquisa e `Cadastro`.
+- Após o breadcrumb, encapsular o restante do conteúdo visual da tela em `<section class="container py-3">`.
 - Header em `section.row g-3 align-items-start mb-4`.
 - `kicker` com ícone e texto `Cadastro`.
-- Título: `Novo [label]` ou `Editar [label]`.
-- Em modo de edição, exibir card de auditoria à direita com `card flat-card audit-card d-none d-md-block`.
+- Título em negrito: `Novo [label]` ou `Editar [label]`.
+- Em modo de edição, exibir card de auditoria compacto à direita usando classes Bootstrap, como `card d-none d-md-block`.
+- Card de auditoria não deve exibir título/label "Auditoria".
+- Card de auditoria deve ter largura automática pelo conteúdo, fonte reduzida, ícone `fa-clock-rotate-left` à esquerda centralizado verticalmente, criação à esquerda e alteração à direita somente se houver dados de alteração.
 - Em modo de inclusão, não exibir o card de auditoria.
 - Não exibir auditoria em dispositivos pequenos, mesmo em modo de edição.
-- Abas arredondadas: `nav nav-pills`, `nav-link rounded-pill px-3`.
+- Abas arredondadas com ícones: `nav nav-pills`, `nav-link rounded-pill px-3`.
+- As abas devem ficar dentro do mesmo card do formulário, antes do conteúdo da aba.
 - Primeira aba: `Dados cadastrais`.
 - Abas extras somente se YAML ou padrão real justificar.
-- Um único card principal por aba.
-- Agrupar campos por seções internas com `section-heading`, `section-icon` e `hr`, como exemplo "Endereço".
+- Um único card principal envolvendo abas e conteúdo do formulário.
+- Agrupar campos por seções internas com estrutura Bootstrap contendo ícone, título, subtítulo e `hr`, como exemplo "Endereço".
 - Não criar cards/forms lado a lado nem cards separados por grupo.
 
 ## Campos
 
 - Formulário reativo.
 - `colunas-layout`: `0` oculta; `N` usa Bootstrap; `N*` encerra linha; ausente usa largura confortável.
-- Labels obrigatórios em vermelho com `required-label` e `fa-circle-exclamation help-dot`.
+- Labels dos campos devem usar negrito (`fw-semibold`).
+- Campos obrigatórios devem ter o label inteiro em vermelho usando `required-label`.
+- Além do label em vermelho, campos obrigatórios devem exibir o ícone `fa-circle-exclamation help-dot` também em vermelho.
 - Inputs com ícone usam `input-group` e `input-group-text` quando fizer sentido.
 - `mask` aplica atributo `mask`.
 - `fk` usa `ng-select` com service da entidade referenciada e `fk-display`.
@@ -53,13 +63,19 @@ Criar tela de cadastro Angular seguindo `.specs/templates/cadastro.html`.
 - Com `:id`, carregar `service.buscar(id)` e aplicar `patchValue`.
 - `Gravar` chama `incluir` ou `alterar`.
 - Em sucesso, mostrar toastr e voltar para `[nome-tabela]/pesquisar`.
-- HTTP 400/422: warning com mensagem da API.
-- HTTP 500+: erro genérico.
-- Em erro, permanecer no cadastro.
+- Em erro HTTP, não exibir mensagens nem navegar localmente; o tratamento global é responsabilidade do `HttpErrorsInterceptor` da lib Angular ativado por `provideApcoreHttpInterceptors()`.
+- Em callbacks de erro, cuidar apenas do estado local da tela, como parar loader e reabilitar botões.
 
 ## Critérios de aceite
 
 - Auditoria não é editável, aparece somente em modo de edição e não aparece em dispositivos pequenos.
+- Breadcrumb fica antes do container principal e usa ícone `fa-house` no link inicial.
+- Template usa `@if`/`@for`, não `*ngIf`/`*ngFor`.
+- Título da página aparece em negrito.
+- Card de auditoria é compacto, sem título, com ícone à esquerda e criação/alteração lado a lado quando houver alteração.
+- Abas ficam dentro do mesmo card do formulário e têm ícone.
+- Seções internas do formulário têm ícone, título e subtítulo.
+- Labels dos campos aparecem em negrito.
 - Não há cards/forms lado a lado.
 - Botões finais são `Voltar` e `Gravar`.
-- Campos obrigatórios têm validação e linguagem visual do modelo.
+- Campos obrigatórios têm validação, label em vermelho e ícone de exclamação em vermelho.

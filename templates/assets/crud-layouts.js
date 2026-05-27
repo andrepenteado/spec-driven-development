@@ -5,7 +5,6 @@ document.addEventListener('DOMContentLoaded', () => {
       pageLength: 6,
       lengthMenu: [6, 10, 25, 50],
       order: [],
-      columnDefs: [{ orderable: false, targets: 0 }],
       language: {
         search: 'Busca rápida',
         lengthMenu: '_MENU_ por página',
