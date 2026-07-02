@@ -25,6 +25,8 @@ Criar enums, entidade, repository e filter QueryDSL.
 - `obrigatorio`: `@NotBlank` para string; `@NotNull` para demais.
 - Mensagem: `[label_campo] é um campo obrigatório`.
 - `fk`: `@ManyToOne` e `@JoinColumn(name = "fk_[nometabelareferenciadasemseparador]")`.
+- `textoN`: `String` com `@Column(columnDefinition = "TEXT")`.
+- `foto`/`arquivo`: mapear como a **UUID** do anexo — campo `java.util.UUID` com `@Column(name = "fk_[nomecampo]")` e FK para `upload(uuid)`. Não usar `@ManyToOne` para `Upload`, pois a lib APcore não fornece o metamodelo `QUpload` exigido pelo QueryDSL ao varrer a entidade.
 - `enum`: `@Enumerated(EnumType.STRING)`.
 - Incluir auditoria, `Serializable`, `serialVersionUID`, `equals/hashCode` por `id` e `toString()`.
 

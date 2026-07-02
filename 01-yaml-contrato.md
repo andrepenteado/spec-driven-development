@@ -52,7 +52,7 @@ tabela:
 | Propriedade | Default | Efeito |
 |---|---|---|
 | `nome` | - | Nome snake_case. |
-| `tipo` | - | `string`, `integer`, `long`, `boolean`, `date`, `datetime`, `decimal`. |
+| `tipo` | - | `string`, `textoN`, `integer`, `long`, `boolean`, `date`, `datetime`, `decimal`, `foto`, `arquivo`. |
 | `label` | Capitalização de `nome` | Texto de UI e mensagens. |
 | `pk` | `false` | Primary key. |
 | `autoincremento` | `false` | Coluna auto incrementável. |
@@ -74,6 +74,36 @@ tabela:
 - Campo pesquisável aparece no form oculto de filtros.
 - Enum pesquisável aparece como combo.
 - FK pesquisável aparece como `ng-select`.
+
+## Campo de texto longo (`textoN`)
+
+O tipo `textoN` gera um `<textarea>` com **N linhas**, onde `N` é o número no
+sufixo do tipo: `texto3` → textarea de 3 linhas, `texto5` → 5 linhas, etc.
+
+- **Persistência:** coluna `TEXT`; em Java, `String`; em TypeScript, `string`.
+- Aceita `obrigatorio`, `indice` e `pesquisavel: contem` (é texto). Ocupa a largura
+  definida por `colunas-layout` (campos longos costumam usar a linha inteira).
+
+## Campos de upload (`foto` e `arquivo`)
+
+Os tipos `foto` e `arquivo` representam um anexo e são mapeados como **FK para a
+tabela `upload`** da dependência `br.unesp.fc.andrepenteado.core:upload` (lib APcore),
+cuja entidade `Upload` tem PK `uuid` (UUID) e os campos `nome`, `descricao`,
+`tipoMime`, `tamanho`, `base64`.
+
+- **Persistência:** `@ManyToOne` para `br.unesp.fc.andrepenteado.core.upload.Upload`;
+  coluna FK `fk_[nomecampo]` do tipo `UUID`. No changelog Liquibase o tipo é `UUID`
+  referenciando `upload(uuid)`.
+- **Frontend:** usa o `UploadService` de `@andre.penteado/ngx-apcore`
+  (`buscar`, `incluir`, `alterar`) e o DTO `Upload`.
+- **`foto`:** exibe a miniatura (thumbnail) da imagem no formulário; clicar na
+  miniatura abre o diálogo para **incluir/editar** a imagem. Preview via
+  `data:[tipoMime];base64,[base64]`.
+- **`arquivo`:** campo de **upload simples** (seletor de arquivo mostrando o nome),
+  sem miniatura/preview.
+- Aceitam `obrigatorio`; **não** se aplicam `unique`, `indice`, `pesquisavel`,
+  `mask` nem `enum`. Em `exibe-grid`, `foto` mostra miniatura pequena e `arquivo`
+  mostra o nome do anexo.
 
 ## Manifesto
 

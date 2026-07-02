@@ -19,7 +19,8 @@ Criar ou atualizar changelog Liquibase da tabela do CRUD.
 - Se o changelog da versão existir, adicionar `<changeSet>`.
 - `id`: data atual `YYYY-MM-DD`.
 - `author`: `autor`.
-- Tipos SQL: `string=VARCHAR`, `integer=INTEGER`, `long=BIGINT`, `boolean=BOOLEAN`, `date=DATE`, `datetime=TIMESTAMP`, `decimal=NUMERIC`.
+- Tipos SQL: `string=VARCHAR`, `textoN=TEXT`, `integer=INTEGER`, `long=BIGINT`, `boolean=BOOLEAN`, `date=DATE`, `datetime=TIMESTAMP`, `decimal=NUMERIC`, `foto=UUID`, `arquivo=UUID`.
+- `foto` e `arquivo`: coluna `fk_[nomecampo]` do tipo `UUID` com FK para `upload(uuid)` (tabela da lib APcore).
 - PK: `pk_[nome_tabela]`.
 - Unique: `un_[nometabelasemseparador]_[nomecamposemseparador]`.
 - Índice: `idx_[nometabelasemseparador]_[nomecamposemseparador]`.
