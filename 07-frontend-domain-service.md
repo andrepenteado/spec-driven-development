@@ -18,6 +18,8 @@ Criar enums, entidade TypeScript e service Angular.
 
 - `id?: number`.
 - `fk`: tipo da entidade referenciada.
+- `textoN`: tipo `string`.
+- `foto`/`arquivo`: tipo `Upload` (de `@andre.penteado/ngx-apcore`).
 - `enum`: tipo do enum gerado.
 - Auditoria opcional: `criadoPor`, `criadoEm`, `alteradoPor`, `alteradoEm`.
 

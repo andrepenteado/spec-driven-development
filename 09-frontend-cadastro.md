@@ -49,6 +49,10 @@ Criar tela de cadastro Angular seguindo `.specs/templates/cadastro.html`.
 - Não alimentar `[items]` do `ng-select` com getter que recria arrays a cada detecção de mudança; usar propriedade estável e atualizá-la quando a lista base ou o registro atual mudar.
 - `enum` usa radio buttons com labels.
 - `boolean` usa checkbox/toggle.
+- `textoN` usa `<textarea>` com `rows="N"` (N = número no sufixo do tipo, ex.: `texto3` → 3 linhas) e ocupa a largura do `colunas-layout`.
+- `foto`: exibe miniatura (thumbnail) da imagem; clicar na miniatura abre o diálogo para incluir/editar. Usa `UploadService` de `@andre.penteado/ngx-apcore` e preview `data:[tipoMime];base64,[base64]`.
+- O campo `foto` deve ficar **sempre centralizado verticalmente** em relação aos demais campos da mesma linha: usar `align-items-center` na `row` e centralizar a miniatura na coluna (`d-flex flex-column align-items-center justify-content-center`), dando à linha um aspecto de portfólio.
+- `arquivo`: campo de upload simples (seletor de arquivo mostrando o nome), sem miniatura, também via `UploadService`.
 - Textarea e campos longos ocupam `col-12`.
 
 ## Botões
