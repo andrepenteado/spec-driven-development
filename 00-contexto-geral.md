@@ -7,7 +7,7 @@ Definir regras globais para geração de CRUD.
 ## Stack
 
 - Backend: Java 25, Spring Boot 4, PostgreSQL, Liquibase, Logback e QueryDSL.
-- Frontend: Angular 21, Node 24, Bootstrap 5, FontAwesome 7, ngx-ui-loader, ngx-toastr, ngx-mask e ng-select.
+- Frontend: Angular 22, Node 24.18.0, Bootstrap 5, FontAwesome 7, ngx-ui-loader, ngx-toastr, ngx-mask e ng-select.
 
 ## Escopo
 

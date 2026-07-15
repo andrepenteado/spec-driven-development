@@ -42,7 +42,7 @@ Nos projetos que usam esta spec, a recomendação é manter:
 A spec atual orienta geração para projetos com:
 
 - Backend: Java 25, Spring Boot 4, PostgreSQL, Liquibase, Logback e QueryDSL.
-- Frontend: Angular 21, Node 24, Bootstrap 5, FontAwesome 7, ngx-ui-loader, ngx-toastr, ngx-mask e ng-select.
+- Frontend: Angular 22, Node 24.18.0, Bootstrap 5, FontAwesome 7, ngx-ui-loader, ngx-toastr, ngx-mask e ng-select.
 
 Essas tecnologias devem ser tratadas como padrão da documentação atual. Se um projeto consumidor divergir, a divergência deve estar documentada no próprio projeto ou refletida em uma variação desta spec.
 
@@ -60,6 +60,9 @@ Essas tecnologias devem ser tratadas como padrão da documentação atual. Se um
 - `08-frontend-pesquisar.md`: regras para tela de pesquisa.
 - `09-frontend-cadastro.md`: regras para tela de cadastro.
 - `10-checklist-final.md`: checklist de validação final.
+- `11-monitoramento-faro.md`: RUM dos frontends (Grafana Faro via lib `ngx-apcore`) e padrão de logs dos componentes.
+- `12-monitoramento-healthz.md`: healthz do nginx, probes do chart e observabilidade do backend (Tempo/Loki/Prometheus).
+- `13-remocao-secrets-backend.md`: playbook de remoção de segredos do working tree e do histórico git.
 - `templates/`: referências visuais executáveis para telas.
 - `.cruds/`: pasta do projeto consumidor para YAMLs operacionais de CRUD. Ela fica fora de `.specs/` para não misturar dados do projeto consumidor com a spec compartilhada.
 

@@ -65,6 +65,9 @@ Criar tela de cadastro Angular seguindo `.specs/templates/cadastro.html`.
 - Desabilitar `Gravar` enquanto loader ativo.
 - Com `:id`, carregar `service.buscar(id)` e aplicar `patchValue`.
 - `Gravar` chama `incluir` ou `alterar`.
+- Logar as operações com `console.info`, espelhando as mensagens do resource do backend (em produção o Faro envia ao Loki — ver `11-monitoramento-faro.md`):
+  - Carregar: `` console.info(`Buscar [label] de ID #${id}`) `` no início de `carregar(id)`.
+  - Gravar: `` console.info(`${this.modoEdicao ? 'Alterar dados do' : 'Incluir novo'} [label] ${JSON.stringify(objeto)}`) `` antes da chamada ao service (ajustar gênero do label).
 - Em sucesso, mostrar toastr e voltar para `[nome-tabela]/pesquisar`.
 - Em erro HTTP, não exibir mensagens nem navegar localmente; o tratamento global é responsabilidade do `HttpErrorsInterceptor` da lib Angular ativado por `provideApcoreHttpInterceptors()`.
 - Em callbacks de erro, cuidar apenas do estado local da tela, como parar loader e reabilitar botões.
@@ -82,3 +85,4 @@ Criar tela de cadastro Angular seguindo `.specs/templates/cadastro.html`.
 - Não há cards/forms lado a lado.
 - Botões finais são `Voltar` e `Gravar`.
 - Campos obrigatórios têm validação, label em vermelho e ícone de exclamação em vermelho.
+- Operações de buscar e gravar logam com `console.info` no padrão definido.

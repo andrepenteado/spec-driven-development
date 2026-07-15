@@ -28,6 +28,7 @@
 - Service Angular criado com `INIT_CONFIG`.
 - Pesquisa criada seguindo template e filtros.
 - Cadastro criado seguindo template.
+- Operações de pesquisar, buscar, gravar e excluir logam com `console.info` (padrão em `11-monitoramento-faro.md`).
 
 ## Regras críticas
 

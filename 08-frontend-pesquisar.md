@@ -58,6 +58,10 @@ Criar tela de pesquisa Angular seguindo `.specs/templates/pesquisar.html`.
 - Editar navega para cadastro.
 - Excluir confirma com SweetAlert2: `Confirma a exclusão [NomeTabela] de ID #[id]`.
 - Após exclusão com sucesso, recarregar lista.
+- Logar as operações com `console.info`, espelhando as mensagens do resource do backend (em produção o Faro envia ao Loki — ver `11-monitoramento-faro.md`):
+  - Listagem completa: `console.info('Listar todos [plural]')` no início de `listar()`.
+  - Pesquisa com filtro: `` console.info(`Pesquisar [plural] com filtro ${JSON.stringify(this.filtro)}`) `` antes da chamada ao service.
+  - Exclusão: `` console.info(`Excluir [label] de ID #${id}`) `` após a confirmação, antes da chamada ao service.
 - Limpar filtros deve apenas limpar o objeto de filtro e recarregar a lista completa, preservando o comportamento padrão do DataTables.
 - Regra obrigatória para qualquer atualização de grid com DataTables: ao receber uma nova lista, destruir o DataTables, remover a tabela do DOM com `@if`, limpar temporariamente o array, forçar detecção de mudanças, atribuir a nova lista, recriar a tabela no DOM e só então inicializar o DataTables novamente.
 - Não simplificar essa sequência para apenas `destroy()` + troca do array + nova inicialização. O DataTables mantém controle próprio sobre o DOM da tabela e pode impedir que a segunda atualização reflita a nova lista, especialmente ao alternar entre pesquisas que retornam conjuntos diferentes ou ao limpar filtros.
@@ -84,3 +88,4 @@ setTimeout(() => {
 - Coluna principal do grid exibe ícone à esquerda, título e subtítulo.
 - Segunda execução de pesquisa, limpeza de filtros e recarregamento após exclusão atualizam o grid corretamente, inclusive quando a nova lista contém registros diferentes dos exibidos na consulta anterior.
 - Loader não desaparece antes do grid estar inicializado.
+- Operações de listar, pesquisar e excluir logam com `console.info` no padrão definido.

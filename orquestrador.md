@@ -4,7 +4,7 @@ Use este arquivo como ponto de entrada. Leia as specs na ordem indicada antes de
 
 ## Objetivo
 
-Criar CRUDs novos a partir de YAMLs em `.cruds/*.yaml`, usando Java 25, Spring Boot 4, PostgreSQL, Liquibase, QueryDSL e Angular 21.
+Criar CRUDs novos a partir de YAMLs em `.cruds/*.yaml`, usando Java 25, Spring Boot 4, PostgreSQL, Liquibase, QueryDSL e Angular 22.
 
 ## Ordem de leitura obrigatória
 
@@ -19,6 +19,14 @@ Criar CRUDs novos a partir de YAMLs em `.cruds/*.yaml`, usando Java 25, Spring B
 9. `08-frontend-pesquisar.md`
 10. `09-frontend-cadastro.md`
 11. `10-checklist-final.md`
+12. `11-monitoramento-faro.md`
+13. `12-monitoramento-healthz.md`
+14. `13-remocao-secrets-backend.md`
+
+As specs 11 a 13 são padrões de módulo/plataforma (monitoramento e segredos):
+valem para o módulo como um todo, não por CRUD. Ler quando o trabalho tocar
+telemetria, healthz/probes, deploy ou segredos — na geração de CRUD, aplicar
+apenas o padrão de logs de `11-monitoramento-faro.md`.
 
 ## Fluxo obrigatório
 
