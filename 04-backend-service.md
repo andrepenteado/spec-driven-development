@@ -28,10 +28,50 @@ Criar regra de negócio do CRUD e auditoria.
 - Pesquisa usa `repository.findAll(filtro.toPredicate())` ou padrão QueryDSL equivalente.
 - Logs devem usar `tabela.label`.
 
+## Listas (`tipo: lista`)
+
+### `persistencia: agregado`
+
+A coleção chega no mesmo payload do registro do CRUD e é gravada por cascata. Não
+criar service próprio para a entidade filha.
+
+- Em `incluir` e `alterar`, **religar cada filho ao pai antes de salvar**: o
+  frontend não envia a volta ao pai (ela é `@JsonIgnore`) e sem isso a FK vai
+  nula no insert.
+
+```java
+if (pedido.getItens() != null) {
+    pedido.getItens().forEach(item -> item.setPedido(pedido));
+}
+```
+
+- Em `alterar`, aplicar a coleção recebida sobre a coleção gerenciada em vez de
+  trocar a referência da lista: com `orphanRemoval`, substituir a instância
+  quebra o rastreamento do Hibernate. Limpar e repopular a lista existente
+  (`existente.getItens().clear(); existente.getItens().addAll(...)`) ou usar o
+  padrão de merge já adotado pelo projeto.
+- A auditoria continua sendo preenchida só no registro do CRUD.
+- `excluir` não precisa remover os filhos: `cascade`/`orphanRemoval` cuidam disso.
+
+### `persistencia: independente`
+
+Criar `[NomeTabelaFilha]Service` com os mesmos padrões desta spec — `@Secured` com
+os perfis do CRUD pai, auditoria via `SecurityService`, logs com o label da lista.
+
+- Métodos: `listarPor[NomeTabelaPai](Long id)`, `buscar(Long id)`,
+  `incluir(@Valid obj)`, `alterar(@Valid obj, Long id)` e `excluir(Long id)`.
+- A auditoria é preenchida **neste** service, não no do pai: o filho é gravado por
+  conta própria.
+- O service do pai não sabe da coleção: `incluir`/`alterar`/`excluir` do CRUD não
+  tocam nos filhos. A exclusão em cascata é responsabilidade do banco
+  (`onDelete` em `02-backend-liquibase.md`).
+
 ## Critérios de aceite
 
 - Auditoria é preenchida no service.
 - Pesquisa aceita múltiplos filtros simultâneos.
 - Métodos estão protegidos pelos perfis.
 - Mensagens usam label do YAML.
+- Registro com lista grava, altera e exclui os filhos junto, sem service próprio
+  para a entidade filha e sem FK nula.
 - `excluir` de um ID inexistente retorna 404 (via handler global da lib ou `RepositoryUtils`), sem `try/catch` local reimplementando essa conversão.

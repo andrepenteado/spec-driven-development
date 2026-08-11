@@ -26,16 +26,22 @@ import { PREFIXO_PERFIL_SISTEMA } from "../../config/layout";
 export const [nomeTabela]Routes: Routes = crudRoutes(
   PesquisarComponent,
   CadastroComponent,
-  [`${PREFIXO_PERFIL_SISTEMA}PERFIL`]
-  // idParam opcional (4º argumento) quando a chave não é "id", ex.: 'username'
+  { perfisAutorizados: [`${PREFIXO_PERFIL_SISTEMA}PERFIL`] }
 );
 ```
 
-- `crudRoutes()` monta as 3 rotas padrão (`pesquisar`, `cadastro`, `cadastro/:id`), já protegidas por `autorizarPerfilGuard`.
+- `crudRoutes()` monta as 3 rotas padrão (`pesquisar`, `cadastro`, `cadastro/:id`) mais o redirecionamento da rota vazia para `pesquisar`.
+- O 3º argumento é um **objeto de opções** (`CrudRoutesOpcoes`), não uma lista de perfis:
+  - `perfisAutorizados?: string[]` — protege as 3 rotas com `autorizarPerfilGuard`. Omitido, as rotas ficam sem guard de perfil.
+  - `idParam?: string` — nome do parâmetro de rota do ID na edição. Default `id`; usar quando a chave for outra, ex.: `'username'`.
+  - `redirecionarParaPesquisar?: boolean` — default `true`.
+- Os componentes podem ser passados como classe ou como import dinâmico (`() => import('./x').then(c => c.X)`), para carga sob demanda.
 - Não recriar manualmente o array de rotas quando `crudRoutes()` cobrir o caso.
+- Campo `tipo: lista` **não** gera rota, nas duas persistências: a coleção é sempre editada dentro do cadastro do CRUD pai, mesmo quando o filho tem endpoints próprios.
 
 ## Menu
 
+- Um item por CRUD; lista não gera item de menu.
 - Adicionar item raiz, sem grupo/submenu.
 - `id: "[nome-tabela]"`
 - `texto: "tabela.plural"`
@@ -52,9 +58,13 @@ export const API_[NOME_TABELA_PLURAL]: string = '/[nome-tabela-plural]';
 ```
 
 - Não usar `/api` hardcoded.
+- Cada lista `persistencia: independente` também ganha a sua constante,
+  `API_[NOME_TABELA_FILHA_PLURAL]`. Lista `agregado` não ganha nenhuma: ela não tem
+  endpoint próprio.
 
 ## Critérios de aceite
 
 - Pesquisa e cadastro são acessíveis pelas rotas.
+- `crudRoutes()` recebe o objeto de opções, não uma lista de perfis solta.
 - Menu respeita roles.
 - Services usam a constante de API.

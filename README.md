@@ -39,10 +39,7 @@ Nos projetos que usam esta spec, a recomendação é manter:
 
 ## Stack documentada
 
-A spec atual orienta geração para projetos com:
-
-- Backend: Java 25, Spring Boot 4, PostgreSQL, Liquibase, Logback e QueryDSL.
-- Frontend: Angular 22, Node 24.18.0, Bootstrap 5, FontAwesome 7, ngx-spinner, ngx-toastr, ngx-mask e ng-select.
+A stack canônica está em `00-contexto-geral.md`, que é a versão lida pela IA. Em resumo: Java 25 + Spring Boot 4 no backend e Angular 22 no frontend.
 
 Essas tecnologias devem ser tratadas como padrão da documentação atual. Se um projeto consumidor divergir, a divergência deve estar documentada no próprio projeto ou refletida em uma variação desta spec.
 
@@ -221,13 +218,11 @@ Antes de executar `subtree push`, revise se a pasta `.specs/` contém somente mu
 ## Como usar em um projeto consumidor
 
 1. Disponibilize esta documentação no projeto consumidor, preferencialmente em `.specs/`.
-2. Crie os YAMLs de CRUD em `.cruds/[nome-crud].yaml`.
+2. Crie os YAMLs de CRUD em `.cruds/[nome-crud].yaml`, conforme `01-yaml-contrato.md`.
 3. Peça para a IA ler e seguir `.specs/orquestrador.md`.
-4. A IA deve validar os YAMLs e informar status.
-5. O desenvolvedor confirma explicitamente quais CRUDs executar.
-6. A IA gera backend e frontend seguindo as specs.
-7. A IA cria `.cruds/[nome-crud].generated.yaml` após sucesso.
-8. A IA informa arquivos criados ou alterados e validações executadas.
+4. Confirme explicitamente quais CRUDs executar, depois do relatório de validação.
+
+O fluxo que a IA segue a partir daí — ordem de leitura das specs, validação, relatório de status, geração e manifesto — está definido em `orquestrador.md` e não é repetido aqui.
 
 ## Prompt recomendado
 
@@ -253,28 +248,13 @@ Depois do relatório da IA, confirme explicitamente:
 Execute o CRUD marca.
 ```
 
-## Fluxo esperado da IA
-
-1. Ler `orquestrador.md`.
-2. Ler as specs na ordem obrigatória.
-3. Escanear `.cruds/*.yaml`, ignorando `*.generated.yaml`.
-4. Validar cada YAML conforme o contrato.
-5. Inspecionar o projeto real antes de criar arquivos.
-6. Apresentar relatório com status: `novo`, `existente`, `conflito` ou `invalido`.
-7. Aguardar confirmação explícita do desenvolvedor.
-8. Gerar backend e frontend conforme as specs.
-9. Criar o manifesto `.generated.yaml` somente após sucesso.
-10. Informar arquivos alterados e validações executadas.
-
 ## Regras importantes
 
-- As specs desta pasta prevalecem sobre inferências genéricas da IA.
-- Padrões reais do projeto consumidor prevalecem sobre exemplos, desde que não violem os critérios de aceite.
-- A IA deve inspecionar o projeto real antes de gerar arquivos.
-- A IA não deve sobrescrever CRUD já gerado.
-- A IA não deve alterar arquivos não pertencentes ao CRUD solicitado.
-- YAMLs já executados devem ter o respectivo `.generated.yaml`.
-- Templates em `.specs/templates` são referências visuais executáveis. Ao gerar Angular, a IA deve omitir `<html>`, `<head>`, `<body>`, CDNs e scripts.
+As regras de precedência e o que a IA não pode fazer estão em `orquestrador.md` (fluxo e precedência) e em `00-contexto-geral.md` (regras globais e templates Angular). Para o desenvolvedor, o que importa saber:
+
+- A IA não sobrescreve CRUD já gerado e não altera arquivos fora do CRUD solicitado.
+- YAMLs já executados devem ter o respectivo `.generated.yaml`; é ele que marca o CRUD como concluído.
+- Padrões reais do projeto consumidor prevalecem sobre os exemplos da spec, desde que não violem os critérios de aceite.
 
 ## Observações
 

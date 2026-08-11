@@ -44,7 +44,7 @@ apenas o padrão de logs de `11-monitoramento-faro.md`.
 
 - Specs desta pasta prevalecem sobre inferências genéricas da IA.
 - Padrões reais do projeto prevalecem sobre exemplos, desde que não violem critérios de aceite.
-- Templates em `.specs/templates` são referência visual executável; em Angular, omitir `<html>`, `<head>`, `<body>`, CDNs e scripts.
+- Templates em `.specs/templates` são referência visual executável, não código a copiar: as regras de template Angular estão em `00-contexto-geral.md`.
 - Se houver conflito entre specs, pare e relate o conflito.
 
 ## Critérios de aceite
@@ -52,4 +52,5 @@ apenas o padrão de logs de `11-monitoramento-faro.md`.
 - Nenhum CRUD existente ou conflitante foi sobrescrito.
 - Todas as specs aplicáveis foram usadas.
 - Backend e frontend compartilham os mesmos nomes derivados, endpoints, labels, filtros e enums.
+- Cada campo `tipo: lista` gerou tabela e entidade filhas nos dois lados, com service e resource próprios apenas quando `persistencia: independente`, e nunca rota ou menu.
 - O manifesto `.generated.yaml` foi criado somente depois da geração bem-sucedida.

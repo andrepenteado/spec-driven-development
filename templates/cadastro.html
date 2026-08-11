@@ -61,6 +61,17 @@
                 <i class="fa-solid fa-address-book me-2"></i>Contatos
               </button>
             </li>
+            <!-- Abas de lista: sempre depois das abas comuns, na ordem do YAML -->
+            <li class="nav-item" role="presentation">
+              <button class="nav-link rounded-pill px-3" id="dependentes-tab" data-bs-toggle="tab" data-bs-target="#dependentes-tab-pane" type="button" role="tab" aria-controls="dependentes-tab-pane" aria-selected="false">
+                <i class="fa-solid fa-list me-2"></i>Dependentes
+              </button>
+            </li>
+            <li class="nav-item" role="presentation">
+              <button class="nav-link rounded-pill px-3" id="certificacoes-tab" data-bs-toggle="tab" data-bs-target="#certificacoes-tab-pane" type="button" role="tab" aria-controls="certificacoes-tab-pane" aria-selected="false">
+                <i class="fa-solid fa-list me-2"></i>Certificações
+              </button>
+            </li>
           </ul>
 
           <div class="tab-content">
@@ -97,6 +108,25 @@
                 <div class="col-12 col-md-7">
                   <label class="form-label fw-semibold">E-mail</label>
                   <input class="form-control" value="ana.lima@apcode.com.br">
+                </div>
+
+                <!-- FK com fk-tipo: radio -> switches Bootstrap, exclusivos pelo name do radio -->
+                <div class="col-12">
+                  <label class="form-label fw-semibold required-label">Regime de contratação <i class="fa-solid fa-circle-exclamation help-dot" title="Campo obrigatório"></i></label>
+                  <div class="d-flex flex-wrap gap-3">
+                    <div class="form-check form-switch">
+                      <input class="form-check-input" type="radio" role="switch" name="regime" id="regime_1" checked>
+                      <label class="form-check-label" for="regime_1">CLT</label>
+                    </div>
+                    <div class="form-check form-switch">
+                      <input class="form-check-input" type="radio" role="switch" name="regime" id="regime_2">
+                      <label class="form-check-label" for="regime_2">Pessoa jurídica</label>
+                    </div>
+                    <div class="form-check form-switch">
+                      <input class="form-check-input" type="radio" role="switch" name="regime" id="regime_3">
+                      <label class="form-check-label" for="regime_3">Estágio</label>
+                    </div>
+                  </div>
                 </div>
               </div>
 
@@ -174,6 +204,91 @@
                 </div>
               </div>
             </section>
+
+            <!-- Lista com formato: sem-modal -> subformulario no topo, botao Adicionar, tabela abaixo -->
+            <section class="tab-pane fade" id="dependentes-tab-pane" role="tabpanel" aria-labelledby="dependentes-tab" tabindex="0">
+              <div class="d-flex align-items-center gap-3 mb-4">
+                <span class="d-inline-flex align-items-center justify-content-center rounded bg-primary-subtle text-primary p-2"><i class="fa-solid fa-people-roof"></i></span>
+                <div>
+                  <h2 class="h5 fw-bold mb-1">Dependentes</h2>
+                  <p class="text-secondary mb-0">Registros gravados junto com o colaborador, sem chamada própria ao backend.</p>
+                </div>
+              </div>
+
+              <!-- Subformulario: <div>, nunca <form> (estamos dentro do <form> principal) -->
+              <div class="row g-3 mb-3">
+                <div class="col-12 col-md-5">
+                  <label class="form-label fw-semibold required-label">Nome <i class="fa-solid fa-circle-exclamation help-dot" title="Campo obrigatório"></i></label>
+                  <input class="form-control" placeholder="Nome do dependente">
+                </div>
+                <div class="col-12 col-md-4">
+                  <label class="form-label fw-semibold required-label">Parentesco <i class="fa-solid fa-circle-exclamation help-dot" title="Campo obrigatório"></i></label>
+                  <select class="form-select"><option>Filho(a)</option><option>Cônjuge</option></select>
+                </div>
+                <div class="col-12 col-md-3">
+                  <label class="form-label fw-semibold">Nascimento</label>
+                  <input class="form-control" type="date">
+                </div>
+              </div>
+
+              <div class="d-flex justify-content-end mb-4">
+                <button class="btn btn-primary" type="button"><i class="fa-solid fa-plus me-2"></i>Adicionar</button>
+              </div>
+
+              <div class="table-responsive">
+                <table class="table table-hover align-middle w-100 mb-0">
+                  <thead>
+                    <tr><th>Ações</th><th>Nome</th><th>Parentesco</th><th>Nascimento</th></tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td><div class="action-stack"><button class="btn btn-outline-danger btn-sm" type="button" title="Excluir" aria-label="Excluir"><i class="fa-solid fa-trash-can"></i></button></div></td>
+                      <td>Miguel Lima</td>
+                      <td>Filho(a)</td>
+                      <td>12/03/2018</td>
+                    </tr>
+                    <tr>
+                      <td><div class="action-stack"><button class="btn btn-outline-danger btn-sm" type="button" title="Excluir" aria-label="Excluir"><i class="fa-solid fa-trash-can"></i></button></div></td>
+                      <td>Helena Lima</td>
+                      <td>Filho(a)</td>
+                      <td>29/09/2021</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </section>
+
+            <!-- Lista com formato: modal -> botao Novo, tabela, e o modal no fim do template -->
+            <section class="tab-pane fade" id="certificacoes-tab-pane" role="tabpanel" aria-labelledby="certificacoes-tab" tabindex="0">
+              <div class="d-flex align-items-center gap-3 mb-4">
+                <span class="d-inline-flex align-items-center justify-content-center rounded bg-primary-subtle text-primary p-2"><i class="fa-solid fa-certificate"></i></span>
+                <div>
+                  <h2 class="h5 fw-bold mb-1">Certificações</h2>
+                  <p class="text-secondary mb-0">Inclusão pelo modal; a tabela mostra apenas o que já foi adicionado.</p>
+                </div>
+              </div>
+
+              <div class="d-flex justify-content-end mb-4">
+                <button class="btn btn-primary" type="button" data-bs-toggle="modal" data-bs-target="#modal-certificacoes"><i class="fa-solid fa-plus me-2"></i>Novo</button>
+              </div>
+
+              <div class="table-responsive">
+                <table class="table table-hover align-middle w-100 mb-0">
+                  <thead>
+                    <tr><th>Ações</th><th>Curso</th><th>Instituição</th><th>Conclusão</th></tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td><div class="action-stack"><button class="btn btn-outline-danger btn-sm" type="button" title="Excluir" aria-label="Excluir"><i class="fa-solid fa-trash-can"></i></button></div></td>
+                      <td>Arquitetura de software</td>
+                      <td>APCode</td>
+                      <td>10/2025</td>
+                    </tr>
+                  </tbody>
+                </table>
+                <!-- Lista vazia usa: <div class="alert alert-light border mb-0">Nenhum registro adicionado em Certificações.</div> -->
+              </div>
+            </section>
           </div>
         </div>
       </div>
@@ -186,6 +301,40 @@
         </div>
       </div>
     </form>
+
+    <!-- Modal da lista: fora do <form> principal e fora das abas -->
+    <div class="modal fade" id="modal-certificacoes" tabindex="-1" aria-labelledby="modal-certificacoes-titulo" aria-hidden="true">
+      <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title fw-bold" id="modal-certificacoes-titulo">Certificações</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+          </div>
+          <div class="modal-body">
+            <div class="row g-3">
+              <div class="col-12 col-md-6">
+                <label class="form-label fw-semibold required-label">Curso <i class="fa-solid fa-circle-exclamation help-dot" title="Campo obrigatório"></i></label>
+                <select class="form-select"><option>Arquitetura de software</option><option>Segurança de aplicações</option></select>
+              </div>
+              <div class="col-12 col-md-6">
+                <label class="form-label fw-semibold">Instituição</label>
+                <input class="form-control" placeholder="Instituição emissora">
+              </div>
+              <div class="col-12 col-md-4">
+                <label class="form-label fw-semibold">Conclusão</label>
+                <input class="form-control" type="month">
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button class="btn btn-light" type="button" data-bs-dismiss="modal">Cancelar</button>
+            <button class="btn btn-primary" type="button"><i class="fa-solid fa-plus me-2"></i>Adicionar</button>
+            <!-- Fechamento programatico apos adicionar: acionar este botao por @ViewChild -->
+            <button class="d-none" type="button" data-bs-dismiss="modal"></button>
+          </div>
+        </div>
+      </div>
+    </div>
   </section>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
 </body>

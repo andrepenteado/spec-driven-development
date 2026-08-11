@@ -21,18 +21,28 @@ Definir regras globais para geração de CRUD.
 - Inspecionar o projeto real antes de criar arquivos.
 - Seguir padrões existentes de pacotes, nomes, imports, logs, exceptions, layout, menu, loaders e DataTables.
 - Usar português do Brasil em mensagens, logs, validações e comentários.
-- Em templates Angular, usar sintaxe moderna de blocos (`@if`, `@for`, `@switch`) em vez das diretivas estruturais antigas (`*ngIf`, `*ngFor`, `*ngSwitch`).
+- Mensagens devem usar `tabela.label`, não termos genéricos como "Registro".
+- Concordância: labels terminados em "a" usam feminino; demais usam masculino.
+- Todo arquivo `.java` ou `.ts` criado deve iniciar com comentário contendo autor, data/hora pt_BR e observação de que foi criado com ajuda da IA.
+- Toda classe `.java` criada deve usar Javadoc na classe e nos métodos.
+- Preserve código existente e não sobrescreva arquivos não pertencentes ao CRUD.
+
+## Templates Angular
+
+Regras válidas para toda tela gerada; as specs 08 e 09 não as repetem.
+
+- Omitir `<html>`, `<head>`, `<body>`, CDNs e scripts: os arquivos em `.specs/templates` são referência visual executável, não código a copiar literalmente.
+- Usar sintaxe moderna de blocos (`@if`, `@for`, `@switch`) em vez das diretivas estruturais antigas (`*ngIf`, `*ngFor`, `*ngSwitch`).
 - Preferir classes utilitárias e componentes do Bootstrap 5 para decoração e layout.
 - Usar CSS customizado somente quando Bootstrap 5 não atender de forma simples.
 - CSS compartilhado criado para CRUDs deve ficar no CSS global do projeto (`frontend/src/styles.css`), nunca referenciar ou importar CSS de `.specs/templates/assets` no código gerado.
 - Estilos globais do projeto (`frontend/src/styles.css`) devem ser carregados depois dos CSS de bibliotecas no `angular.json`, para sobrescrever ajustes visuais de Bootstrap, DataTables e ng-select quando necessário.
 - Tratamento global de erros HTTP pertence à lib Angular via `provideApcoreHttpInterceptors()`/`HttpErrorsInterceptor`. Componentes de CRUD não devem duplicar mensagens ou navegações para erros 400, 401, 403, 404, 409, 422 ou 500; em callbacks de erro, cuidar apenas de estado local, como parar loader.
-- Mensagens devem usar `tabela.label`, não termos genéricos como "Registro".
-- **Nunca logar o objeto inteiro** (`JSON.stringify(entidade)`, `JSON.stringify(form.value)`), no frontend nem no backend: os logs do navegador vão para o Loki via Faro e as entidades carregam dados pessoais (CPF, e-mail, endereço) ou sensíveis (senha). Logar apenas o rótulo da entidade mais um campo identificador (`nome`, `descricao`, `razaoSocial`) ou o ID — ex.: `` `Alterar produto ${produto.nome}` ``. Nas telas que estendem as bases de CRUD da lib, esse log já sai da base a partir de `rotulo`/`rotuloPlural` e `identificacao()`.
-- Concordância: labels terminados em "a" usam feminino; demais usam masculino.
-- Todo arquivo `.java` ou `.ts` criado deve iniciar com comentário contendo autor, data/hora pt_BR e observação de que foi criado com ajuda da IA.
-- Toda classe `.java` criada deve usar Javadoc na classe e nos métodos.
-- Preserve código existente e não sobrescreva arquivos não pertencentes ao CRUD.
+
+## Logs
+
+- **Nunca logar o objeto inteiro** (`JSON.stringify(entidade)`, `JSON.stringify(form.value)`), no frontend nem no backend: os logs do navegador vão para o Loki via Faro e as entidades carregam dados pessoais (CPF, e-mail, endereço) ou sensíveis (senha). Logar apenas o rótulo da entidade mais um campo identificador (`nome`, `descricao`, `razaoSocial`) ou o ID.
+- Formato das mensagens e pontos obrigatórios de log: `11-monitoramento-faro.md`.
 
 ## Auditoria
 
@@ -51,9 +61,10 @@ Regras:
 - Preencher auditoria exclusivamente no service com `SecurityService`.
 - O service obtém usuário com `securityService.getUserLogin().getLogin()`, sem fallback.
 - Na alteração, preservar criação e preencher alteração.
+- Em `tipo: lista`, a auditoria segue `lista.persistencia`: `agregado` não recebe auditoria (ela pertence à raiz do agregado); `independente` recebe, porque o filho é gravado por conta própria.
 
 ## Critérios de aceite
 
 - Nenhum arquivo existente de outro CRUD foi sobrescrito.
-- Auditoria existe no banco, entidade, TypeScript e service.
+- Auditoria existe no banco, entidade, TypeScript e service do CRUD, e nas entidades filhas de lista somente quando `persistencia: independente`.
 - Resource não participa do preenchimento da auditoria.
