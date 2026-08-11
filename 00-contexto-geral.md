@@ -7,7 +7,7 @@ Definir regras globais para geração de CRUD.
 ## Stack
 
 - Backend: Java 25, Spring Boot 4, PostgreSQL, Liquibase, Logback e QueryDSL.
-- Frontend: Angular 22, Node 24.18.0, Bootstrap 5, FontAwesome 7, ngx-ui-loader, ngx-toastr, ngx-mask e ng-select.
+- Frontend: Angular 22, Node 24.18.0, Bootstrap 5, FontAwesome 7, ngx-spinner, ngx-toastr, ngx-mask e ng-select.
 
 ## Escopo
 
@@ -28,6 +28,7 @@ Definir regras globais para geração de CRUD.
 - Estilos globais do projeto (`frontend/src/styles.css`) devem ser carregados depois dos CSS de bibliotecas no `angular.json`, para sobrescrever ajustes visuais de Bootstrap, DataTables e ng-select quando necessário.
 - Tratamento global de erros HTTP pertence à lib Angular via `provideApcoreHttpInterceptors()`/`HttpErrorsInterceptor`. Componentes de CRUD não devem duplicar mensagens ou navegações para erros 400, 401, 403, 404, 409, 422 ou 500; em callbacks de erro, cuidar apenas de estado local, como parar loader.
 - Mensagens devem usar `tabela.label`, não termos genéricos como "Registro".
+- **Nunca logar o objeto inteiro** (`JSON.stringify(entidade)`, `JSON.stringify(form.value)`), no frontend nem no backend: os logs do navegador vão para o Loki via Faro e as entidades carregam dados pessoais (CPF, e-mail, endereço) ou sensíveis (senha). Logar apenas o rótulo da entidade mais um campo identificador (`nome`, `descricao`, `razaoSocial`) ou o ID — ex.: `` `Alterar produto ${produto.nome}` ``. Nas telas que estendem as bases de CRUD da lib, esse log já sai da base a partir de `rotulo`/`rotuloPlural` e `identificacao()`.
 - Concordância: labels terminados em "a" usam feminino; demais usam masculino.
 - Todo arquivo `.java` ou `.ts` criado deve iniciar com comentário contendo autor, data/hora pt_BR e observação de que foi criado com ajuda da IA.
 - Toda classe `.java` criada deve usar Javadoc na classe e nos métodos.

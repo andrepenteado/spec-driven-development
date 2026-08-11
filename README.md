@@ -42,7 +42,7 @@ Nos projetos que usam esta spec, a recomendação é manter:
 A spec atual orienta geração para projetos com:
 
 - Backend: Java 25, Spring Boot 4, PostgreSQL, Liquibase, Logback e QueryDSL.
-- Frontend: Angular 22, Node 24.18.0, Bootstrap 5, FontAwesome 7, ngx-ui-loader, ngx-toastr, ngx-mask e ng-select.
+- Frontend: Angular 22, Node 24.18.0, Bootstrap 5, FontAwesome 7, ngx-spinner, ngx-toastr, ngx-mask e ng-select.
 
 Essas tecnologias devem ser tratadas como padrão da documentação atual. Se um projeto consumidor divergir, a divergência deve estar documentada no próprio projeto ou refletida em uma variação desta spec.
 

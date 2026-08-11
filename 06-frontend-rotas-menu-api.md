@@ -14,10 +14,25 @@ Registrar rotas, menu e constante de API.
 ## Rotas
 
 - Rota raiz `[nome-tabela]` com `loadChildren`.
-- Rotas internas:
-  - `pesquisar`
-  - `cadastro`
-  - `cadastro/:id`
+- Rotas internas geradas por `crudRoutes()` de `@andre.penteado/ngx-apcore` (>= 22.0.0), não escritas à mão:
+
+```ts
+import { Routes } from '@angular/router';
+import { PesquisarComponent } from "./pesquisar/pesquisar.component";
+import { CadastroComponent } from "./cadastro/cadastro.component";
+import { crudRoutes } from "@andre.penteado/ngx-apcore";
+import { PREFIXO_PERFIL_SISTEMA } from "../../config/layout";
+
+export const [nomeTabela]Routes: Routes = crudRoutes(
+  PesquisarComponent,
+  CadastroComponent,
+  [`${PREFIXO_PERFIL_SISTEMA}PERFIL`]
+  // idParam opcional (4º argumento) quando a chave não é "id", ex.: 'username'
+);
+```
+
+- `crudRoutes()` monta as 3 rotas padrão (`pesquisar`, `cadastro`, `cadastro/:id`), já protegidas por `autorizarPerfilGuard`.
+- Não recriar manualmente o array de rotas quando `crudRoutes()` cobrir o caso.
 
 ## Menu
 

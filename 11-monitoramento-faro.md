@@ -99,18 +99,28 @@ componentes de tela logam as operações com `console.info`, espelhando as
 mensagens que os resources do backend já logam com `log.info`. Padrão (ajustar
 gênero/plural da entidade):
 
+⚠️ **Logar somente a identificação do registro, nunca o objeto inteiro.** Estes
+logs são persistidos no Loki: `JSON.stringify(entidade)`/`JSON.stringify(form.value)`
+despeja lá CPF, e-mail, endereço e — em telas de usuário — a própria senha
+digitada. Logue o rótulo da entidade mais um campo identificador (`nome`,
+`descricao`, `razaoSocial`) ou o ID.
+
 ```ts
 // pesquisar (listagem completa)
-console.info('Listar todos pacientes');
-// pesquisar com filtro
+console.info('Listar pacientes');
+// pesquisar com filtro — só os campos do filtro, que não são dados do registro
 console.info(`Pesquisar produtos com filtro ${JSON.stringify(this.filtro)}`);
 // buscar por ID (carregar cadastro)
 console.info(`Buscar paciente de ID #${id}`);
 // gravar (antes da chamada ao service)
-console.info(`${this.modoEdicao ? 'Alterar dados do' : 'Incluir novo'} produto ${JSON.stringify(produto)}`);
+console.info(`${this.incluir ? 'Incluir' : 'Alterar'} produto ${produto.nome}`);
 // excluir (após a confirmação, antes da chamada)
 console.info(`Excluir paciente de ID #${id}`);
 ```
+
+Nas telas que estendem `PesquisarBaseComponent`/`CadastroBaseComponent`, esses
+logs já são emitidos pela base (a partir de `rotulo`/`rotuloPlural` e
+`identificacao()`) — a página não deve repeti-los.
 
 Em desenvolvimento os logs ficam só no console; em produção chegam ao Loki com
 `app_name` e, quando houver trace ativo, correlacionados ao trace do backend.

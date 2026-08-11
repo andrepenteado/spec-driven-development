@@ -28,7 +28,8 @@ Criar enums, entidade, repository e filter QueryDSL.
 - `textoN`: `String` com `@Column(columnDefinition = "TEXT")`.
 - `foto`/`arquivo`: mapear como a **UUID** do anexo — campo `java.util.UUID` com `@Column(name = "fk_[nomecampo]")` e FK para `upload(uuid)`. Não usar `@ManyToOne` para `Upload`, pois a lib APcore não fornece o metamodelo `QUpload` exigido pelo QueryDSL ao varrer a entidade.
 - `enum`: `@Enumerated(EnumType.STRING)`.
-- Incluir auditoria, `Serializable`, `serialVersionUID`, `equals/hashCode` por `id` e `toString()`.
+- Incluir auditoria, `Serializable`, `serialVersionUID` e `toString()`.
+- `equals`/`hashCode` por `id`: usar `@EqualsAndHashCode(of = "id")` do Lombok (a entidade já usa `@Data`/`@Getter`/`@Setter` do Lombok, salvo padrão diferente do projeto) em vez de escrever os métodos manualmente. Para chave composta (ex.: mais de um campo `unique` juntos), listar os campos em `of = {"campo1", "campo2"}`.
 
 ## Repository
 

@@ -15,8 +15,8 @@ Criar tela de pesquisa Angular seguindo `.specs/templates/pesquisar.html`.
 - Usar sintaxe moderna de blocos Angular (`@for`, `@if`) em vez de `*ngFor` e `*ngIf`.
 - Usar ao máximo classes Bootstrap 5; CSS customizado deve ser mínimo e ficar em `frontend/src/styles.css`.
 - Não importar nem referenciar CSS de `.specs/templates/assets` em arquivos Angular gerados.
-- Iniciar com `<ngx-ui-loader>` configurado com `loaderId="[nome-tabela]-pesquisar"`, `fgsType`, `fgsColor`, `overlayColor`, `pbColor` e `[hasProgressBar]="true"`.
-- Depois do loader, renderizar o breadcrumb fora do container principal.
+- Não declarar loader na tela: o `<ngx-spinner>` é único por aplicação, no `app.component`, e o `PesquisarBaseComponent` o aciona via `NgxSpinnerService`. A tela começa direto pelo breadcrumb.
+- Renderizar o breadcrumb fora do container principal.
 - O breadcrumb deve iniciar com link para `/pagina-inicial` contendo ícone FontAwesome `fa-house` antes do texto `Início`, seguido de `tabela.plural`.
 - Após o breadcrumb, encapsular o restante do conteúdo visual da tela em `<section class="container py-3">`.
 - Header com `kicker`, ícone `fa-table-list`, título `tabela.plural` em negrito, subtítulo curto e botão `Novo`.
@@ -51,28 +51,18 @@ Criar tela de pesquisa Angular seguindo `.specs/templates/pesquisar.html`.
 
 - `standalone: true`.
 - Selector: `[nomeprojeto]-[nometabela]-pesquisar`.
-- Usar `NgxUiLoaderService`.
-- Loader inicia antes do HTTP e para somente após preencher lista e inicializar DataTable.
-- Em erro, parar loader.
-- `Novo` navega para cadastro.
-- Editar navega para cadastro.
-- Excluir confirma com SweetAlert2: `Confirma a exclusão [NomeTabela] de ID #[id]`.
-- Após exclusão com sucesso, recarregar lista.
-- Logar as operações com `console.info`, espelhando as mensagens do resource do backend (em produção o Faro envia ao Loki — ver `11-monitoramento-faro.md`):
-  - Listagem completa: `console.info('Listar todos [plural]')` no início de `listar()`.
-  - Pesquisa com filtro: `` console.info(`Pesquisar [plural] com filtro ${JSON.stringify(this.filtro)}`) `` antes da chamada ao service.
-  - Exclusão: `` console.info(`Excluir [label] de ID #${id}`) `` após a confirmação, antes da chamada ao service.
-- Limpar filtros deve apenas limpar o objeto de filtro e recarregar a lista completa, preservando o comportamento padrão do DataTables.
-- Regra obrigatória para qualquer atualização de grid com DataTables: ao receber uma nova lista, destruir o DataTables, remover a tabela do DOM com `@if`, limpar temporariamente o array, forçar detecção de mudanças, atribuir a nova lista, recriar a tabela no DOM e só então inicializar o DataTables novamente.
-- Não simplificar essa sequência para apenas `destroy()` + troca do array + nova inicialização. O DataTables mantém controle próprio sobre o DOM da tabela e pode impedir que a segunda atualização reflita a nova lista, especialmente ao alternar entre pesquisas que retornam conjuntos diferentes ou ao limpar filtros.
-- Inicializar DataTable após `listar()`:
-
-```ts
-setTimeout(() => {
-  $('#datatables-pesquisar-[nome-tabela-plural]').DataTable(Datatables.config);
-  this.uiLoaderService.stopLoader('[nome-tabela]-pesquisar');
-}, 5);
-```
+- Estender `PesquisarBaseComponent<T>` de `@andre.penteado/ngx-apcore` (>= 22.0.0) em vez de reimplementar o ciclo de listar/incluir/editar/excluir/DataTable do zero. A página só declara:
+  - `basePath` (rota base, ex.: `'[nome-tabela-plural]'`), `tableId` (id da `<table>`) e `rotuloPlural` (ex.: `'produtos'`, usado nos logs);
+  - `listar()`, `excluirRegistro(id)`, `idDoRegistro(item)`, `mensagemConfirmarExclusao(item)` (mensagem completa, ex.: `` `Confirma a exclusão [de/do/da] [entidade] ${item.nome}` ``).
+- `PesquisarBaseComponent` usa `NgxSpinnerService` (`ngx-spinner`, peer dependency da lib) internamente: `ngOnInit` (herdado) já mostra o spinner, chama `pesquisar()` e, ao concluir, chama `redesenharTabela()` — a página não chama `show()`/`hide()` manualmente.
+- `Novo`/`editar`/`excluir` (herdados de `PesquisarBaseComponent`) já navegam para cadastro e confirmam exclusão com SweetAlert2 usando `mensagemConfirmarExclusao(item)`.
+- Após exclusão com sucesso, a base recarrega apenas a lista (`pesquisar()`), preservando o contexto da tela; nunca usar `window.location.reload()`.
+- A base implementa `ngOnDestroy` destruindo a DataTable ao sair da tela — não reimplementar na página.
+- Filtro é responsabilidade da página (campos e critérios variam por entidade, não fazem parte da base): implementar um método `filtrar()` que filtra `this.lista` em memória e chama `this.redesenharTabela(listaFiltrada)`; "Limpar filtros" chama `redesenharTabela(this.lista)` (lista completa). Pesquisa sem filtro preenchido continua usando toastr `Informe ao menos um filtro para pesquisar.` quando fizer sentido para o volume de dados da tela.
+- Logs de listagem e exclusão são emitidos pela própria base a partir de `rotuloPlural` — a página não repete esses `console.info`. Logs adicionais da tela (ex.: pesquisa com filtro) seguem a regra de identificação abaixo.
+- **Regra obrigatória do grid, já implementada por `PesquisarBaseComponent.redesenharTabela()` — a página NÃO deve reimplementá-la, só chamá-la:** ao receber uma nova lista, destruir o DataTables, remover a tabela do DOM (via `tabelaPronta`/`@if` no template), limpar temporariamente o array, forçar detecção de mudanças (`ChangeDetectorRef.detectChanges()`), atribuir a nova lista, recriar a tabela no DOM e só então reinicializar o DataTables. Não simplificar para apenas `destroy()` + troca do array + nova inicialização: o DataTables mantém controle próprio sobre o DOM da tabela e pode não refletir a lista nova, especialmente ao alternar entre pesquisas com conjuntos diferentes ou ao limpar filtros.
+- O template DEVE envolver a tabela em `@if (tabelaPronta) { <table id="datatables-pesquisar-[nome-tabela-plural]">...</table> }` — sem esse `@if`, a sequência acima não tem efeito e o grid pode não refletir a lista nova.
+- Só sobrescrever `redesenharTabela()`/reimplementar o ciclo manualmente se o caso realmente não couber no contrato de `PesquisarBaseComponent` (ex.: página com múltiplas tabelas independentes na mesma tela).
 
 ## Critérios de aceite
 

@@ -65,16 +65,22 @@ Criar tela de cadastro Angular seguindo `.specs/templates/cadastro.html`.
 
 - `standalone: true`.
 - Selector: `[nomeprojeto]-[nometabela]-cadastro`.
-- LoaderId: `[nome-tabela]-cadastro`.
-- Desabilitar `Gravar` enquanto loader ativo.
-- Com `:id`, carregar `service.buscar(id)` e aplicar `patchValue`.
-- `Gravar` chama `incluir` ou `alterar`.
-- Logar as operações com `console.info`, espelhando as mensagens do resource do backend (em produção o Faro envia ao Loki — ver `11-monitoramento-faro.md`):
-  - Carregar: `` console.info(`Buscar [label] de ID #${id}`) `` no início de `carregar(id)`.
-  - Gravar: `` console.info(`${this.modoEdicao ? 'Alterar dados do' : 'Incluir novo'} [label] ${JSON.stringify(objeto)}`) `` antes da chamada ao service (ajustar gênero do label).
-- Em sucesso, mostrar toastr e voltar para `[nome-tabela]/pesquisar`.
+- Estender `CadastroBaseComponent<T>` de `@andre.penteado/ngx-apcore` (>= 22.0.0) em vez de reimplementar o ciclo de buscar/patchValue/incluir/alterar/mensagens do zero. A página só declara:
+  - `form` (o `FormGroup` reativo da tela);
+  - `buscar(id)`, `incluirEntidade(valor)`, `alterarEntidade(valor)`;
+  - `tituloGravar` (título do toastr, ex.: `"Gravar [label]"`), `mensagemGravarSucesso(entidade)` (mensagem completa, ex.: `` `Dados [de/do/da] [label] ${entidade.nome} gravados com sucesso` ``) e `rotulo` (ex.: `'produto'`, usado nos logs);
+  - `tituloFormulario()`/`subtituloFormulario()` continuam sendo métodos próprios da página (texto livre, não fazem parte da base).
+- Se o service do projeto expõe um único método `gravar(obj, incluir)` em vez de `incluir`/`alterar` separados, `incluirEntidade`/`alterarEntidade` viram um adaptador de uma linha cada, delegando para esse método com o booleano correspondente.
+- Hooks opcionais da base, usar somente quando a tela precisar:
+  - `carregarListasAuxiliares()`: combos/listas carregadas na abertura da tela (ex.: lista de empresas para um `ng-select` de FK), independente de incluir/editar. **Devolva o `Observable` da carga** quando `aposCarregar` depender dessas listas (ex.: marcar os perfis do usuário dentro da lista de perfis do sistema): a busca do registro só acontece depois que ele emitir. Devolver `void` mantém o comportamento não-bloqueante.
+  - `novaEntidade()`: registro em branco usado no modo inclusão (padrão `{}`); sobrescreva quando a tela precisar de uma instância real da classe de domínio.
+  - `aposCarregar(entidade)`: repatch de campos que `patchValue` não resolve sozinho — FK cujo `FormControl` guarda o objeto inteiro (não só o id), `FormArray` reconstruído a partir de uma lista de relacionados, campos derivados. É chamado **nos três momentos**: ao abrir em inclusão (com `novaEntidade()`), ao carregar para edição e após gravar com sucesso — por isso **deve ser idempotente** (limpe `FormArray` com `clear()` antes de repopular).
+  - `antesGravar(valor)`: pré-processamento assíncrono do valor do form antes de incluir/alterar — ex.: subir o arquivo do campo `foto`/`arquivo` via `UploadService` e só então gravar a entidade com o UUID retornado.
+- `ngOnInit` (herdado) aguarda `carregarListasAuxiliares()`, resolve o parâmetro de rota (`idParam`, default `'id'`) e então: havendo id, `pesquisar(id)` → `buscar(id)` → `patchValue` → `aposCarregar`; sem id, `novaEntidade()` → `aposCarregar`.
+- `gravar()` (herdado): valida o form: se inválido, mostra toastr "Dados obrigatórios" e para; se válido, aplica `antesGravar`, despacha `incluirEntidade`/`alterarEntidade` e, em sucesso, faz `form.reset()` + `patchValue(entidade)` + `aposCarregar(entidade)` + toastr de sucesso (`tituloGravar`/`mensagemGravarSucesso`) — a tela permanece na página, agora em modo de edição do registro salvo (não navega de volta para `pesquisar`; isso é o que permite telas como vínculo incremental de itens relacionados, ex.: adicionar colaboradores a uma unidade administrativa um de cada vez, chamando `gravar()` a cada vínculo sem perder o contexto da tela).
 - Em erro HTTP, não exibir mensagens nem navegar localmente; o tratamento global é responsabilidade do `HttpErrorsInterceptor` da lib Angular ativado por `provideApcoreHttpInterceptors()`.
-- Em callbacks de erro, cuidar apenas do estado local da tela, como parar loader e reabilitar botões.
+- **Quando NÃO estender `CadastroBaseComponent`:** telas com múltiplos formulários independentes na mesma página (ex.: cadastro composto de entidade principal + sub-cadastros, cada um com seu próprio `formEnviado`/estado de abertura) têm complexidade de domínio real, não boilerplate — implementar à mão nesses casos, seguindo o restante desta spec (estrutura visual, campos, botões) mas sem forçar o contrato da base.
+- Logs de buscar e gravar são emitidos pela própria base a partir de `rotulo` e `identificacao(entidade)` — a página não repete esses `console.info`. Sobrescreva `identificacao()` quando o campo identificador não for `nome`/`descricao`/`id` (ex.: `razaoSocial`, `username`).
 
 ## Critérios de aceite
 
