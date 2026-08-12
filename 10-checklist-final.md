@@ -29,6 +29,7 @@
 - Service Angular criado com `INIT_CONFIG`.
 - Pesquisa criada seguindo template, estendendo `PesquisarBaseComponent`, com filtro resolvido no backend via `/pesquisar` e grid client-side.
 - Cadastro criado seguindo template, estendendo `CadastroBaseComponent`, com abas de `aba`, controles de `fk-tipo` e abas de lista.
+- Todo `@Component` criado declara `changeDetection: ChangeDetectionStrategy.Eager`.
 - Operações de pesquisar, buscar, gravar e excluir logam com `console.info` (padrão em `11-monitoramento-faro.md`).
 
 ## Regras críticas
@@ -44,6 +45,9 @@
 - Não criar rota nem item de menu para entidade filha de lista, em nenhuma persistência.
 - Não criar repository, service nem resource para lista `agregado`.
 - Não gerar `<html>`, `<head>`, `<body>`, CDNs ou scripts em templates Angular.
+- Não omitir `changeDetection: ChangeDetectionStrategy.Eager` em nenhum `@Component`, nem removê-lo de componente existente ao refatorar — estender as bases de CRUD não substitui o carimbo.
+- Não repetir `provideHttpClient()` na lista de providers: uma única chamada com todos os recursos.
+- Não usar `provideApcoreHttpInterceptors()`: função removida da lib, substituída pelo array `apcoreInterceptors`.
 
 ## Manifesto
 

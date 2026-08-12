@@ -163,7 +163,7 @@ protected override aposCarregar(paciente: Paciente): void {
 - Adicionar: validar `formProntuario`; se válido, preencher a volta ao pai com `this.entidade`, chamar `service.incluir(valor)` e, no sucesso, `unshift` no array, `reset()` do subformulário, zerar a flag de envio e toastr de sucesso.
 - Excluir: **com** confirmação SweetAlert (`exibirMensagem.showConfirm`), porque o registro existe no banco. No sucesso, remover do array local — não recarregar a tela inteira.
 - `obrigatorio: true` na lista não é validável aqui: o pai é gravado antes de a coleção existir. Tratar como aviso na tela, nunca bloqueando o `Gravar`.
-- Os erros HTTP continuam sendo do `HttpErrorsInterceptor`; o callback de erro cuida só de estado local.
+- Os erros HTTP continuam sendo do `httpErrorsInterceptor`; o callback de erro cuida só de estado local.
 
 ### Tabela da lista (comum às duas)
 
@@ -206,6 +206,7 @@ O modal:
 ## Componente
 
 - `standalone: true`.
+- `changeDetection: ChangeDetectionStrategy.Eager` — obrigatório, inclusive estendendo a base, que não o transmite (`00-contexto-geral.md`). Sem ele o formulário não reflete o registro carregado, as listas auxiliares nem os itens das abas de lista.
 - Selector: `[nomeprojeto]-[nometabela]-cadastro`.
 - **Estender obrigatoriamente `CadastroBaseComponent<T>`** de `@andre.penteado/ngx-apcore` (>= 22.0.0), em vez de reimplementar o ciclo de buscar/patchValue/incluir/alterar/mensagens do zero. A página só declara:
   - `form` (o `FormGroup` reativo da tela);
@@ -223,14 +224,14 @@ O modal:
   - `registroGravado()`: em listas `independente`, confirma que o CRUD já foi gravado e mostra o toastr de atenção quando não. É a última barreira, depois da aba e do botão desabilitados.
 - `ngOnInit` (herdado) aguarda `carregarListasAuxiliares()`, resolve o parâmetro de rota (`idParam`, default `'id'`) e então: havendo id, `pesquisar(id)` → `buscar(id)` → `patchValue` → `aposCarregar`; sem id, `novaEntidade()` → `aposCarregar`.
 - `gravar()` (herdado): valida o form: se inválido, mostra toastr "Dados obrigatórios" e para; se válido, aplica `antesGravar`, despacha `incluirEntidade`/`alterarEntidade` e, em sucesso, faz `form.reset()` + `patchValue(entidade)` + `aposCarregar(entidade)` + toastr de sucesso (`tituloGravar`/`mensagemGravarSucesso`) — a tela permanece na página, agora em modo de edição do registro salvo (não navega de volta para `pesquisar`).
-- Em erro HTTP, cuidar apenas de estado local; o tratamento global é do `HttpErrorsInterceptor` (`00-contexto-geral.md`).
+- Em erro HTTP, cuidar apenas de estado local; o tratamento global é do `httpErrorsInterceptor` (`00-contexto-geral.md`).
 - **Única exceção ao contrato da base:** telas com múltiplos formulários independentes na mesma página (ex.: cadastro composto de entidade principal + sub-cadastros, cada um com seu próprio `formEnviado`/estado de abertura) têm complexidade de domínio real, não boilerplate — implementar à mão nesses casos, seguindo o restante desta spec (estrutura visual, campos, botões) mas sem forçar o contrato da base. **Isso não é um CRUD gerado.** Uma lista `tipo: lista` **não** é esse caso: o subformulário auxiliar não é um formulário independente e a base cobre a tela. Quantidade de campos, de abas ou de listas nunca é motivo para sair da base.
 - Vínculo incremental (gravar a cada item adicionado, mantendo o contexto da tela) é uma exceção deliberada de telas específicas, não o comportamento gerado para `tipo: lista`.
 - Logs de buscar e gravar são emitidos pela própria base a partir de `rotulo` e `identificacao(entidade)` — a página não repete esses `console.info`. Sobrescreva `identificacao()` quando o campo identificador não for `nome`/`descricao`/`id` (ex.: `razaoSocial`, `username`).
 
 ## Critérios de aceite
 
-- A tela estende `CadastroBaseComponent`.
+- A tela estende `CadastroBaseComponent` e declara `changeDetection: ChangeDetectionStrategy.Eager`.
 - Auditoria não é editável, aparece somente em modo de edição e não aparece em dispositivos pequenos.
 - Card de auditoria é compacto, sem título, com ícone à esquerda e criação/alteração lado a lado quando houver alteração.
 - Abas ficam dentro do mesmo card do formulário, têm ícone e seguem a ordem definida; campos sem `aba` estão em `Dados cadastrais`.

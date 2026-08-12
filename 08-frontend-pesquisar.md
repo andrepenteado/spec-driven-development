@@ -75,6 +75,7 @@ inteira e faz paginação, ordenação e busca rápida **client-side**.
 ## Componente
 
 - `standalone: true`.
+- `changeDetection: ChangeDetectionStrategy.Eager` — obrigatório, inclusive estendendo a base, que não o transmite (`00-contexto-geral.md`). Sem ele o grid e os cards não refletem o retorno do HTTP.
 - Selector: `[nomeprojeto]-[nometabela]-pesquisar`.
 - **Estender obrigatoriamente `PesquisarBaseComponent<T>`** de `@andre.penteado/ngx-apcore` (>= 22.0.0), em vez de reimplementar o ciclo de listar/incluir/editar/excluir/DataTable do zero. A página só declara:
   - `basePath` (rota base, ex.: `'[nome-tabela-plural]'`), `tableId` (id da `<table>`) e `rotuloPlural` (ex.: `'produtos'`, usado nos logs);
@@ -85,13 +86,14 @@ inteira e faz paginação, ordenação e busca rápida **client-side**.
 - Após exclusão com sucesso, a base recarrega apenas a lista (`pesquisar()`), preservando o contexto da tela; nunca usar `window.location.reload()`.
 - A base implementa `ngOnDestroy` destruindo a DataTable ao sair da tela — não reimplementar na página.
 - Logs de listagem e exclusão são emitidos pela própria base a partir de `rotuloPlural`; a página não os repete. Log adicional de pesquisa com filtro segue `11-monitoramento-faro.md`.
-- Em erro HTTP, cuidar apenas de estado local; o tratamento global é do `HttpErrorsInterceptor` (`00-contexto-geral.md`).
+- Em erro HTTP, cuidar apenas de estado local; o tratamento global é do `httpErrorsInterceptor` (`00-contexto-geral.md`).
 - **Regra obrigatória do grid, já implementada por `PesquisarBaseComponent.redesenharTabela()` — a página NÃO deve reimplementá-la, só chamá-la:** ao receber uma nova lista, destruir o DataTables, remover a tabela do DOM (via `tabelaPronta`/`@if` no template), limpar temporariamente o array, forçar detecção de mudanças (`ChangeDetectorRef.detectChanges()`), atribuir a nova lista, recriar a tabela no DOM e só então reinicializar o DataTables. Não simplificar para apenas `destroy()` + troca do array + nova inicialização: o DataTables mantém controle próprio sobre o DOM da tabela e pode não refletir a lista nova, especialmente ao alternar entre pesquisas com conjuntos diferentes ou ao limpar filtros.
 - O template DEVE envolver a tabela em `@if (tabelaPronta) { <table id="datatables-pesquisar-[nome-tabela-plural]">...</table> }` — sem esse `@if`, a sequência acima não tem efeito e o grid pode não refletir a lista nova.
 - A única exceção ao contrato da base é a página com múltiplas tabelas independentes na mesma tela, que não é o caso de um CRUD gerado. Volume de dados **não** é motivo para sair da base: se a tela precisar de paginação no servidor, isso é evolução da spec, não decisão da geração.
 
 ## Critérios de aceite
 
+- Componente declara `changeDetection: ChangeDetectionStrategy.Eager`.
 - Cards de dashboard não aparecem em dispositivos pequenos.
 - Filtros refletem exatamente os campos pesquisáveis do YAML, sem labels visíveis, com placeholders identificando os campos.
 - Campos e botões dos filtros permanecem na mesma linha em telas médias e grandes, e os botões exibem somente ícones, com acessibilidade por `title` e `aria-label`.

@@ -37,7 +37,19 @@ Regras válidas para toda tela gerada; as specs 08 e 09 não as repetem.
 - Usar CSS customizado somente quando Bootstrap 5 não atender de forma simples.
 - CSS compartilhado criado para CRUDs deve ficar no CSS global do projeto (`frontend/src/styles.css`), nunca referenciar ou importar CSS de `.specs/templates/assets` no código gerado.
 - Estilos globais do projeto (`frontend/src/styles.css`) devem ser carregados depois dos CSS de bibliotecas no `angular.json`, para sobrescrever ajustes visuais de Bootstrap, DataTables e ng-select quando necessário.
-- Tratamento global de erros HTTP pertence à lib Angular via `provideApcoreHttpInterceptors()`/`HttpErrorsInterceptor`. Componentes de CRUD não devem duplicar mensagens ou navegações para erros 400, 401, 403, 404, 409, 422 ou 500; em callbacks de erro, cuidar apenas de estado local, como parar loader.
+
+## Componentes Angular
+
+Regras válidas para todo `@Component` gerado; as specs 08 e 09 não as repetem.
+
+- Declarar sempre `changeDetection: ChangeDetectionStrategy.Eager`. No Angular 22 o padrão passou a ser `OnPush`, e a migração `ng update` carimba `Eager` (equivalente ao antigo `Default`) em todos os componentes existentes justamente para preservar o comportamento. Sem o carimbo, a tela não reflete dados vindos de `subscribe` — e a falha é silenciosa: nenhum erro no console, nenhuma quebra de build, nenhum teste vermelho.
+- **Nunca remover esse carimbo de um componente existente durante refactor.** É a única linha que separa a tela de funcionar e de congelar sem aviso.
+- Obrigatório inclusive no `AppComponent` raiz da aplicação: `Eager` só age quando a travessia de change detection **alcança** o componente, então uma raiz em `OnPush` congela toda a árvore abaixo dela, mesmo que os filhos declarem `Eager`.
+- `changeDetection` é metadado de `@Component` e **não é herdado**: estender `PesquisarBaseComponent`/`CadastroBaseComponent` não traz o carimbo da base — elas são `@Directive()`, que sequer aceita a propriedade. Cada tela declara o seu.
+- Não compensar a ausência do carimbo com `detectChanges()` manual espalhado pelos `subscribe`: isso mascara a causa e deixa quebrado tudo que não recebeu a chamada.
+- Tratamento global de erros HTTP pertence à lib Angular, via o array `apcoreInterceptors` (que inclui o `httpErrorsInterceptor`). Componentes de CRUD não devem duplicar mensagens ou navegações para erros 400, 401, 403, 404, 409, 422 ou 500; em callbacks de erro, cuidar apenas de estado local, como parar loader.
+- Registrar o `HttpClient` em uma **única** chamada de `provideHttpClient()`, acumulando os recursos como argumentos: `provideHttpClient(withXhr(), withInterceptorsFromDi(), withInterceptors(apcoreInterceptors))`. Repetir `provideHttpClient()` na mesma lista de providers duplica a configuração do cliente e torna o resultado dependente da ordem das chamadas.
+- A função `provideApcoreHttpInterceptors()` não existe mais: os interceptors viraram funcionais (`HttpInterceptorFn`) e são registrados pelo array `apcoreInterceptors` com `withInterceptors`.
 
 ## Logs
 
