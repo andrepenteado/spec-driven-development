@@ -2,7 +2,7 @@
 
 ## Objetivo
 
-Criar tela de pesquisa Angular seguindo `.specs/templates/pesquisar.html`.
+Criar tela de pesquisa Angular seguindo `templates/pesquisar.html`.
 
 As regras globais de template Angular (blocos `@if`/`@for`, Bootstrap 5, CSS) estão
 em `00-contexto-geral.md` e valem aqui sem repetição.

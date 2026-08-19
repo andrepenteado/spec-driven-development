@@ -35,7 +35,7 @@ Ele pode ser usado para:
 Nos projetos que usam esta spec, a recomendação é manter:
 
 - `README.md` do projeto consumidor: documentação específica do produto, problema, objetivo, solução, público-alvo, execução local e decisões próprias daquele projeto;
-- `.specs/` do projeto consumidor: cópia ou referência desta documentação compartilhada, usada como instrução para a IA.
+- clone deste repositório: a documentação compartilhada, adicionada ao contexto da IA a partir da própria pasta do clone, sem cópia dentro do projeto consumidor.
 
 ## Stack documentada
 
@@ -61,82 +61,47 @@ Essas tecnologias devem ser tratadas como padrão da documentação atual. Se um
 - `12-monitoramento-healthz.md`: healthz do nginx, probes do chart e observabilidade do backend (Tempo/Loki/Prometheus).
 - `13-remocao-secrets-backend.md`: playbook de remoção de segredos do working tree e do histórico git.
 - `templates/`: referências visuais executáveis para telas.
-- `.cruds/`: pasta do projeto consumidor para YAMLs operacionais de CRUD. Ela fica fora de `.specs/` para não misturar dados do projeto consumidor com a spec compartilhada.
+- `.cruds/`: pasta do projeto consumidor para YAMLs operacionais de CRUD. Ela fica no repositório do consumidor, fora desta spec, para não misturar dados do projeto com a documentação compartilhada.
 
-Em projetos consumidores, esses arquivos normalmente ficam sob `.specs/`.
+## Uso no projeto consumidor
 
-## Instalação no projeto consumidor com Git Subtree
+Esta spec não é copiada nem versionada dentro do projeto consumidor. Ela vive apenas neste
+repositório, em um clone local, e é disponibilizada para a IA adicionando a pasta desse clone ao
+contexto da sessão quando o projeto precisar gerar ou revisar código.
 
-Como este repositório também é um repositório Git, a forma recomendada de incorporá-lo em outro projeto Git é usando `git subtree`.
+Esse modelo dispensa `git subtree` e submódulo, evita cópias divergentes entre projetos e faz com
+que todo projeto passe a usar a versão atual da spec com um `git pull` feito aqui, sem sincronização
+em cada consumidor.
 
-Com `git subtree`, o projeto consumidor recebe uma cópia versionada da spec dentro de uma pasta do próprio repositório, normalmente `.specs/`, sem transformar o projeto consumidor em submódulo e sem exigir clone separado para quem for trabalhar no projeto.
-
-### Pré-requisitos
-
-Execute os comandos abaixo dentro do repositório do projeto consumidor.
-
-Antes de importar a spec, garanta que o working tree esteja limpo:
+### 1. Clonar a spec uma vez
 
 ```bash
-git status
+git clone git@github.com:andrepenteado/spec-driven-development.git
 ```
 
-Se houver mudanças pendentes, faça commit ou stash antes de continuar.
-
-Também confirme que a pasta `.specs/` ainda não existe no projeto consumidor. O `git subtree add` espera criar o prefixo informado.
+Mantenha o clone atualizado antes de usá-lo em uma sessão:
 
 ```bash
-ls .specs
+cd /caminho/para/spec-driven-development
+git pull
 ```
 
-Se a pasta já existir por cópia manual anterior, resolva isso antes de usar `git subtree`: remova a cópia manual em uma branch própria ou migre seu conteúdo com cuidado. YAMLs operacionais de CRUD devem ficar em `.cruds/`, não dentro de `.specs/`.
+### 2. Adicionar a pasta ao contexto da IA
 
-### 1. Adicionar o repositório da spec como remote
+Trabalhando no projeto consumidor, adicione o diretório do clone ao contexto da sessão. No Claude
+Code:
 
-```bash
-git remote add spec-driven-development git@github.com:andrepenteado/spec-driven-development.git
-git fetch spec-driven-development
+```text
+/add-dir /caminho/para/spec-driven-development
 ```
 
-Se o remote já existir e você precisar corrigir a URL:
+A partir daí a IA lê `orquestrador.md` e os demais arquivos direto da spec, sem que exista qualquer
+cópia dentro do projeto consumidor.
 
-```bash
-git remote set-url spec-driven-development git@github.com:andrepenteado/spec-driven-development.git
-git fetch spec-driven-development
-```
+### 3. Criar a pasta operacional de CRUDs
 
-### 2. Incorporar a spec em `.specs/`
-
-Use `main` se a branch principal deste repositório for `main`. Se for `master` ou outra branch, ajuste o comando.
-
-```bash
-git subtree add --prefix=.specs spec-driven-development main --squash
-```
-
-Esse comando cria a pasta `.specs/` no projeto consumidor com o conteúdo deste repositório.
-
-Depois disso, confirme o estado do repositório. Em geral, `git subtree add` já cria um commit no projeto consumidor.
-
-```bash
-git status
-```
-
-### 3. Atualizar a spec no projeto consumidor
-
-Quando este repositório de specs receber mudanças, atualize o projeto consumidor com:
-
-```bash
-git fetch spec-driven-development
-git subtree pull --prefix=.specs spec-driven-development main --squash
-```
-
-Depois, revise as mudanças e rode as validações normais do projeto consumidor.
-
-### 4. Criar a pasta operacional de CRUDs
-
-Os YAMLs de CRUD do projeto consumidor não devem ficar dentro de `.specs/`, porque essa pasta é controlada pelo subtree da spec compartilhada.
-
-Crie uma pasta `.cruds/` na raiz do projeto consumidor:
+Os YAMLs de CRUD são dados do projeto consumidor, não da spec compartilhada, e ficam no repositório
+do consumidor. Crie uma pasta `.cruds/` na raiz dele:
 
 ```bash
 mkdir .cruds
@@ -149,77 +114,41 @@ Use essa pasta para os YAMLs de entrada e para os manifestos gerados:
 .cruds/marca.generated.yaml
 ```
 
-### 5. Enviar mudanças para o repositório de specs
+### 4. Alterar a spec
 
-Mudanças na spec podem ser detectadas durante o trabalho em um projeto consumidor. Nesse caso, elas podem ser feitas em `.specs/`, desde que sejam isoladas das alterações do código do produto e depois promovidas para este repositório com `git subtree push`.
-
-Quando o projeto consumidor tiver alterações tanto no código do produto quanto em `.specs/`, primeiro commite somente o código do consumidor:
-
-```bash
-git status
-git add . ':!.specs/**'
-git diff --cached --name-only
-git commit -m "feat: ajustes no projeto consumidor"
-```
-
-Depois commite somente as alterações da spec dentro do próprio projeto consumidor:
-
-```bash
-git status --short
-git add .specs
-git diff --cached --name-only
-git commit -m "chore(specs): atualiza especificacoes compartilhadas"
-```
-
-Atualize a referência do repositório de specs e envie o conteúdo de `.specs/` para este repositório:
-
-```bash
-git fetch spec-driven-development
-git subtree push --prefix=.specs spec-driven-development main
-```
-
-Por fim, envie também o histórico do projeto consumidor para o repositório remoto dele:
-
-```bash
-git push
-```
-
-Se o `subtree push` falhar porque a branch `main` deste repositório recebeu mudanças novas, atualize o subtree no projeto consumidor, resolva conflitos se houver, commite e tente o push novamente:
-
-```bash
-git subtree pull --prefix=.specs spec-driven-development main --squash
-git add .specs
-git commit
-git subtree push --prefix=.specs spec-driven-development main
-```
-
-Depois que o `subtree push` for concluído, atualize o clone local deste repositório:
+Mudanças na spec podem ser detectadas durante o trabalho em um projeto consumidor. Como não existe
+cópia no consumidor, a alteração é feita direto no clone deste repositório e commitada aqui:
 
 ```bash
 cd /caminho/para/spec-driven-development
-git pull origin main
+git status --short
+git add .
+git commit -m "chore(specs): atualiza especificacoes compartilhadas"
+git push
 ```
 
-Antes de executar `subtree push`, revise se a pasta `.specs/` contém somente mudanças que realmente pertencem à spec compartilhada. YAMLs operacionais, regras específicas de negócio do consumidor e documentação própria do produto não devem ser promovidos para este repositório.
+Os demais projetos passam a ver a mudança no próximo `git pull` deste repositório. Antes de commitar,
+revise se a alteração pertence mesmo à spec compartilhada: YAMLs operacionais, regras específicas de
+negócio do consumidor e documentação própria do produto não entram aqui.
+
 
 ## Regras para projetos consumidores
 
-- Alterações em `.specs/*.md` e `.specs/templates/` podem ser feitas no projeto consumidor quando forem necessárias para corrigir ou evoluir a spec durante o uso real.
-- Mudanças de spec feitas no consumidor devem ser commitadas separadamente das mudanças do produto e promovidas para este repositório com `git subtree push`.
-- Não adaptar a spec silenciosamente em um único projeto consumidor; se a regra é compartilhada, ela deve voltar para este repositório.
-- Atualizar a spec nos projetos consumidores com `git subtree pull`, não copiando arquivos manualmente.
+- Não versionar a spec dentro do projeto consumidor: nada de cópia manual, subtree ou submódulo. A spec é usada a partir do clone deste repositório, adicionado ao contexto da IA.
+- Alterações em `*.md` e `templates/` são feitas e commitadas neste repositório, não no projeto consumidor.
+- Não adaptar a spec silenciosamente em um único projeto consumidor; se a regra é compartilhada, ela deve vir para este repositório.
+- Antes de uma sessão que dependa da spec, atualizar o clone com `git pull`.
 - Manter a documentação específica do produto no `README.md` do projeto consumidor.
 - Usar `.cruds/*.yaml` para os YAMLs operacionais do projeto consumidor, quando a geração de CRUD for necessária.
 - Tratar `.cruds/*.generated.yaml` como manifesto daquilo que já foi gerado.
-- Não colocar YAMLs operacionais em `.specs/`, porque essa pasta pertence ao subtree da spec compartilhada.
-- Antes de atualizar a spec via `git subtree pull`, garantir que mudanças locais em `.specs/` já foram commitadas, descartadas ou promovidas para este repositório.
+- Manter os YAMLs operacionais em `.cruds/`, no repositório do consumidor, nunca junto da spec compartilhada.
 - Se um projeto consumidor precisar divergir da spec, documentar a exceção no próprio projeto e avaliar se a regra deveria virar uma variação oficial deste repositório.
 
 ## Como usar em um projeto consumidor
 
-1. Disponibilize esta documentação no projeto consumidor, preferencialmente em `.specs/`.
+1. Adicione a pasta do clone deste repositório ao contexto da IA.
 2. Crie os YAMLs de CRUD em `.cruds/[nome-crud].yaml`, conforme `01-yaml-contrato.md`.
-3. Peça para a IA ler e seguir `.specs/orquestrador.md`.
+3. Peça para a IA ler e seguir `orquestrador.md`.
 4. Confirme explicitamente quais CRUDs executar, depois do relatório de validação.
 
 O fluxo que a IA segue a partir daí — ordem de leitura das specs, validação, relatório de status, geração e manifesto — está definido em `orquestrador.md` e não é repetido aqui.
@@ -229,7 +158,7 @@ O fluxo que a IA segue a partir daí — ordem de leitura das specs, validação
 Para executar a leitura geral dos CRUDs pendentes:
 
 ```text
-Leia e siga .specs/orquestrador.md como instrução principal para gerar CRUDs.
+Leia e siga orquestrador.md como instrução principal para gerar CRUDs.
 Os YAMLs de entrada estão em .cruds/.
 Valide, reporte status e aguarde confirmação antes de alterar código.
 ```
@@ -237,7 +166,7 @@ Valide, reporte status e aguarde confirmação antes de alterar código.
 Para um YAML específico:
 
 ```text
-Leia e siga .specs/orquestrador.md.
+Leia e siga orquestrador.md.
 Use o YAML .cruds/marca.yaml.
 Valide primeiro, apresente o status e aguarde confirmação antes de criar arquivos.
 ```
@@ -269,7 +198,7 @@ Esse pedido pode ser interpretado como leitura simples ou resumo do arquivo.
 Prefira:
 
 ```text
-Leia e siga .specs/orquestrador.md como instrução principal.
+Leia e siga orquestrador.md como instrução principal.
 ```
 
 Essa formulação deixa claro que o arquivo deve ser usado como regra de execução, não apenas como conteúdo de referência.

@@ -2,7 +2,7 @@
 
 ## Objetivo
 
-Criar tela de cadastro Angular seguindo `.specs/templates/cadastro.html`.
+Criar tela de cadastro Angular seguindo `templates/cadastro.html`.
 
 As regras globais de template Angular (blocos `@if`/`@for`, Bootstrap 5, CSS) estão
 em `00-contexto-geral.md` e valem aqui sem repetição.

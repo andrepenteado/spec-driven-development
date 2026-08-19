@@ -44,7 +44,7 @@ apenas o padrão de logs de `11-monitoramento-faro.md`.
 
 - Specs desta pasta prevalecem sobre inferências genéricas da IA.
 - Padrões reais do projeto prevalecem sobre exemplos, desde que não violem critérios de aceite.
-- Templates em `.specs/templates` são referência visual executável, não código a copiar: as regras de template Angular estão em `00-contexto-geral.md`.
+- Templates em `templates` são referência visual executável, não código a copiar: as regras de template Angular estão em `00-contexto-geral.md`.
 - Se houver conflito entre specs, pare e relate o conflito.
 
 ## Critérios de aceite
