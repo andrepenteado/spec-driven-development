@@ -32,6 +32,8 @@ tabela:
       autoincremento: true
       exibe-grid: true
 
+    # Gerado pelo sistema: aparece no form sem permitir edição e é repetido
+    # no topo do cadastro, abaixo do título.
     - nome: numero
       tipo: string
       label: Número
@@ -39,6 +41,8 @@ tabela:
       unique: true
       indice: true
       pesquisavel: exato
+      somente-leitura: true
+      exibe-titulo: true
       colunas-layout: 4
       exibe-grid: true
 
@@ -51,6 +55,7 @@ tabela:
       obrigatorio: true
       indice: true
       pesquisavel: exato
+      exibe-titulo: true
       colunas-layout: 8*
       exibe-grid: true
 
@@ -185,6 +190,8 @@ tabela:
 | `mask` | - | Atributo `mask` do ngx-mask. |
 | `pesquisavel` | `false` | Se diferente de `false`, entra no filtro oculto e no QueryDSL filter. |
 | `aba` | `Dados cadastrais` | Aba do cadastro que recebe o campo. |
+| `somente-leitura` | `false` | Campo aparece no cadastro sem permitir edição. |
+| `exibe-titulo` | `false` | Repete `label: valor` abaixo do título do cadastro. |
 | `colunas-layout` | - | Largura Bootstrap no cadastro. `0` oculta; `N*` encerra linha. |
 | `exibe-grid` | `true` | Exibição na pesquisa. |
 | `lista` | - | Bloco da coleção. Obrigatório e exclusivo de `tipo: lista`. |
@@ -255,6 +262,44 @@ service ou resource.
 - `aba` é rejeitada em campos `tipo: lista` (a lista já cria a própria aba) e em
   subcampos dentro de `lista.campos`.
 - Renderização: `09-frontend-cadastro.md`.
+
+## Campo somente leitura (`somente-leitura`)
+
+`somente-leitura: true` mantém o campo no formulário do cadastro, na posição do
+`colunas-layout`, mas **sem permitir edição**: o usuário lê o valor e não consegue
+alterá-lo.
+
+- Vale **somente para o frontend**. Não tem efeito em banco, entidade, service nem
+  resource — o valor continua trafegando no payload e o campo continua no
+  `FormGroup`, para ser gravado junto com o registro.
+- **Não é controle de segurança.** A API aceita o campo normalmente; se a regra é
+  "ninguém pode mudar isso", ela pertence ao service (`04-backend-service.md`).
+- Combina com `obrigatorio: true`: as validações continuam valendo sobre o valor
+  que veio do backend ou de `novaEntidade()`.
+- Uso típico: número gerado pelo sistema, saldo calculado, situação controlada por
+  regra de negócio, chave importada de outro sistema.
+- `colunas-layout: 0` esconde o campo; nesse caso `somente-leitura` não tem efeito
+  visível e não é erro.
+- Renderização por tipo de controle: `09-frontend-cadastro.md`.
+
+## Resumo no título (`exibe-titulo`)
+
+`exibe-titulo: true` repete o campo no **cabeçalho do cadastro**, no formato
+`label: valor`, logo abaixo do título (`Novo [label]` / `Editar [label]`), com a
+fonte de subtítulo.
+
+- Vale **somente para o frontend** e **não** remove o campo do formulário: ele
+  continua sendo renderizado conforme `colunas-layout`. Para exibir o valor apenas
+  no cabeçalho, use `colunas-layout: 0` junto.
+- É comum combinar com `somente-leitura: true`: o dado identifica o registro e não
+  é editável.
+- Vários campos podem ter `exibe-titulo: true`; aparecem na ordem de
+  `tabela.campos`, na mesma linha.
+- Valor vazio ou nulo (modo inclusão, por exemplo) não é exibido.
+- Aceito em `string`, `textoN`, `integer`, `long`, `decimal`, `boolean`, `date`,
+  `datetime`, `enum` e campos `fk` (exibe o `fk-display`). É rejeitado em `foto`,
+  `arquivo` e `tipo: lista`.
+- Renderização e formatação dos valores: `09-frontend-cadastro.md`.
 
 ## Listas (`tipo: lista`)
 
@@ -362,14 +407,17 @@ frontend). Na tabela da lista, `foto` mostra miniatura e `arquivo` mostra o nome
 anexo, com botão de download quando fizer sentido.
 
 Rejeitadas (tornam o YAML `invalido`): `pk`, `autoincremento`, `unique`,
-`pesquisavel`, `aba` e `lista` aninhada. Coleção dentro de coleção é um CRUD
-próprio, não uma lista.
+`pesquisavel`, `aba`, `somente-leitura`, `exibe-titulo` e `lista` aninhada. Coleção
+dentro de coleção é um CRUD próprio, não uma lista. `somente-leitura` não faz
+sentido em um subformulário de inclusão (o campo ficaria impossível de preencher) e
+`exibe-titulo` pertence ao cabeçalho do CRUD pai, não a um subregistro.
 
 ### Restrições do campo `tipo: lista`
 
 - Aceita apenas `nome`, `tipo`, `obrigatorio`, `label` e o bloco `lista`.
 - `unique`, `indice`, `mask`, `enum`, `fk`, `fk-tipo`, `pesquisavel`,
-  `colunas-layout`, `exibe-grid` e `aba` são rejeitados nesse campo.
+  `colunas-layout`, `exibe-grid`, `aba`, `somente-leitura` e `exibe-titulo` são
+  rejeitados nesse campo.
 - Uma lista nunca aparece no grid da pesquisa nem nos filtros.
 - `obrigatorio: true` exige ao menos um registro na coleção.
 
@@ -394,6 +442,10 @@ arquivos:
 - `pesquisavel: contem` em campo não `string` é rejeitado.
 - `fk-tipo` em campo sem `fk`, ou com valor fora de `combo`/`radio`, é rejeitado.
 - `aba` em campo `tipo: lista` ou dentro de `lista.campos` é rejeitada.
+- `somente-leitura` e `exibe-titulo` em campo `tipo: lista` ou dentro de
+  `lista.campos` são rejeitados.
+- `exibe-titulo` em campo `foto` ou `arquivo` é rejeitado.
+- Valor fora de `true`/`false` em `somente-leitura` ou `exibe-titulo` é rejeitado.
 - `tipo: lista` sem bloco `lista`, ou com `lista.campos` vazio, é rejeitado.
 - Subcampo de lista com propriedade ou tipo não aceito é rejeitado.
 - `lista.persistencia` fora de `agregado`/`independente` é rejeitado.

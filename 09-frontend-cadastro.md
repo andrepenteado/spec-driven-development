@@ -17,6 +17,7 @@ em `00-contexto-geral.md` e valem aqui sem repetição.
 - Renderizar o breadcrumb fora do container principal, iniciando com link para `/pagina-inicial` contendo ícone FontAwesome `fa-house` antes do texto `Início`, seguido de `tabela.plural` apontando para pesquisa e `Cadastro`.
 - Após o breadcrumb, encapsular o restante do conteúdo visual da tela em `<section class="container py-3">`.
 - Header em `section.row g-3 align-items-start mb-4`, com `kicker` (ícone + texto `Cadastro`) e título em negrito: `Novo [label]` ou `Editar [label]`.
+- Abaixo do título, o subtítulo da tela e, quando houver campos com `exibe-titulo: true`, a linha de resumo descrita em "Resumo no título".
 - Em modo de edição, exibir card de auditoria compacto à direita usando classes Bootstrap, como `card d-none d-md-block`. Em modo de inclusão, não exibir o card; em dispositivos pequenos, nunca exibir.
 - Card de auditoria: sem título/label "Auditoria", largura automática pelo conteúdo, fonte reduzida, ícone `fa-clock-rotate-left` à esquerda centralizado verticalmente, criação à esquerda e alteração à direita somente se houver dados de alteração.
 - Um único card principal envolvendo abas e conteúdo do formulário. Não criar cards/forms lado a lado nem cards separados por grupo.
@@ -43,12 +44,67 @@ conteúdo, em `nav nav-pills` com `nav-link rounded-pill px-3` e ícone por aba.
 - Campos obrigatórios devem ter o label inteiro em vermelho usando `required-label` e exibir o ícone `fa-circle-exclamation help-dot` também em vermelho.
 - Inputs com ícone usam `input-group` e `input-group-text` quando fizer sentido.
 - `mask` aplica atributo `mask`.
+- `somente-leitura: true` exibe o campo sem permitir edição (ver "Campos somente leitura").
 - `enum` usa radio buttons com labels.
 - `boolean` usa checkbox/toggle.
 - `textoN` usa `<textarea>` com `rows="N"` (N = número no sufixo do tipo, ex.: `texto3` → 3 linhas) e ocupa a largura do `colunas-layout`. Textarea e campos longos ocupam `col-12`.
 - `foto`: exibe miniatura (thumbnail) da imagem; clicar na miniatura abre o diálogo para incluir/editar. Usa `UploadService` de `@andre.penteado/ngx-apcore` e preview `data:[tipoMime];base64,[base64]`.
 - O campo `foto` deve ficar **sempre centralizado verticalmente** em relação aos demais campos da mesma linha: usar `align-items-center` na `row` e centralizar a miniatura na coluna (`d-flex flex-column align-items-center justify-content-center`), dando à linha um aspecto de portfólio.
 - `arquivo`: campo de upload simples (seletor de arquivo mostrando o nome), sem miniatura, também via `UploadService`.
+
+## Campos somente leitura (`somente-leitura`)
+
+`somente-leitura: true` (`01-yaml-contrato.md`) mantém o campo no formulário, na
+posição do `colunas-layout`, bloqueando apenas a edição.
+
+- **Nunca usar o estado `disabled` do `FormControl`** (`disable()` ou
+  `new FormControl({ value, disabled: true })`): `form.value` — usado pelo `gravar()`
+  de `CadastroBaseComponent` — omite controles desabilitados, e o campo iria vazio
+  para o backend. O controle continua habilitado; o bloqueio é do template.
+- O label segue as mesmas regras dos demais campos (negrito e, se `obrigatorio`,
+  em vermelho com o ícone).
+- Bloqueio por tipo de controle:
+
+| Controle | Como bloquear |
+|---|---|
+| `input`, `textarea` (`string`, `textoN`, numéricos, datas, com ou sem `mask`) | atributo `readonly` e classe `bg-body-secondary` para deixar claro que não é editável |
+| `ng-select` (`fk-tipo: combo`) | `[readonly]="true"` no próprio `ng-select` |
+| radio de `enum`, switches de `fk-tipo: radio`, checkbox de `boolean` | envolver o grupo em `div.pe-none` com `aria-disabled="true"` e `tabindex="-1"` nos inputs — `readonly` não funciona em radio/checkbox |
+| `foto`, `arquivo` | mostrar só a miniatura ou o nome do anexo (com download, quando fizer sentido); não renderizar o seletor de arquivo nem a ação de trocar/remover |
+
+- `colunas-layout: 0`: o campo não é renderizado e `somente-leitura` não muda nada.
+- Não é barreira de segurança: a validação de quem pode alterar o quê é do backend
+  (`04-backend-service.md`).
+
+## Resumo no título (`exibe-titulo`)
+
+Campos com `exibe-titulo: true` (`01-yaml-contrato.md`) são repetidos no cabeçalho
+da tela, abaixo do título e do subtítulo, com a fonte de subtítulo:
+
+```html
+<h1 class="display-6 fw-bold mb-2">Editar pedido</h1>
+<p class="text-secondary mb-0">Pedido de venda com itens e ocorrências.</p>
+<p class="text-secondary mb-0 mt-1">
+  <span class="fw-semibold">Número:</span> {{ form.get('numero').value }}
+  <span class="mx-2">·</span>
+  <span class="fw-semibold">Cliente:</span> {{ form.get('cliente').value?.nome }}
+</p>
+```
+
+- Uma única linha `p.text-secondary mb-0 mt-1`, com os campos na ordem de
+  `tabela.campos`, separados por `<span class="mx-2">·</span>`. Só o rótulo é
+  `fw-semibold`; o valor fica na fonte normal do subtítulo.
+- O valor vem do **`FormControl`**, não da entidade carregada: assim a linha
+  acompanha o que está na tela, inclusive depois de gravar.
+- Formatação igual à do grid da pesquisa: `enum` mostra o label, `fk` mostra o
+  `fk-display`, `boolean` mostra Sim/Não, datas usam o formato pt-BR e `decimal`
+  usa o separador pt-BR.
+- Valor `null`, `undefined` ou string vazia: o item some, junto com o separador
+  vizinho. Sem nenhum valor preenchido (modo inclusão, tipicamente), a linha
+  inteira não é renderizada — envolver o bloco em `@if`.
+- O campo **continua** no formulário conforme o `colunas-layout`; `colunas-layout: 0`
+  é o que deixa o valor só no cabeçalho.
+- A linha não substitui o subtítulo de `subtituloFormulario()`: vem depois dele.
 
 ## Campos de relacionamento (`fk-tipo`)
 
@@ -237,6 +293,8 @@ O modal:
 - Abas ficam dentro do mesmo card do formulário, têm ícone e seguem a ordem definida; campos sem `aba` estão em `Dados cadastrais`.
 - Seções internas do formulário têm ícone, título e subtítulo, e não há cards/forms lado a lado.
 - Labels dos campos aparecem em negrito; campos obrigatórios têm validação, label em vermelho e ícone de exclamação em vermelho.
+- Campo `somente-leitura: true` aparece no formulário, não aceita edição e chega gravado ao backend — nenhum `FormControl` desabilitado.
+- Campo `exibe-titulo: true` aparece como `label: valor` abaixo do título, com fonte de subtítulo, e some quando não há valor.
 - FK com `fk-tipo: radio` renderiza switches mutuamente exclusivos e vem pré-selecionada ao editar.
 - Cada `tipo: lista` tem aba própria, tabela sem DataTables com Excluir na 1ª coluna, e o subformulário está fora do `FormGroup` principal e fora de um `<form>` aninhado.
 - Lista `agregado`: adicionar/excluir não chama o backend e a coleção é gravada junto com o registro do CRUD.
