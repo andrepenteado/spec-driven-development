@@ -13,13 +13,39 @@ Criar enums, entidade TypeScript e service Angular.
 
 ## Enum TypeScript
 
-- Criar `enum` e `Record<Enum, string>` de labels.
+- Criar um arquivo por bloco `enum` (`01-yaml-contrato.md`) em
+  `src/app/domain/enums/`, com o nome do arquivo em kebab-case de `enum.nome`.
+- Exportar o `enum` com as mesmas constantes do Java, cada uma com o próprio nome como
+  valor (nunca numérico: o backend serializa a constante como texto), e o
+  `Record<Enum, string>` de labels chamado `[NOME_ENUM]_LABELS`.
+
+```ts
+export enum SituacaoPedido {
+  ABERTO = 'ABERTO',
+  FATURADO = 'FATURADO',
+  CANCELADO = 'CANCELADO'
+}
+
+export const SITUACAO_PEDIDO_LABELS: Record<SituacaoPedido, string> = {
+  [SituacaoPedido.ABERTO]: 'Aberto',
+  [SituacaoPedido.FATURADO]: 'Faturado',
+  [SituacaoPedido.CANCELADO]: 'Cancelado'
+};
+```
+
+- Os labels são os mesmos de `enum.valores` e do `descricao` do enum Java. É esse
+  `Record` que alimenta grid, filtro e radio buttons — nenhuma tela escreve label de
+  enum à mão.
+- Enum já existente com o mesmo nome é reaproveitado, nunca sobrescrito.
 
 ## Entidade TypeScript
 
+- Campo oculto para um perfil por `por-perfil` (`01-yaml-contrato.md`) continua
+  declarado aqui e continua trafegando no payload: a entidade é uma só.
 - `id?: number`.
 - `fk`: tipo da entidade referenciada.
-- `textoN`: tipo `string`.
+- `textoN`, `editor`, `email` e `link`: tipo `string`.
+- `moeda`: tipo `number`, com duas casas decimais. O JSON trafega número, não string formatada — a formatação com `R$` é da tela.
 - `foto`/`arquivo`: tipo `Upload` (de `@andre.penteado/ngx-apcore`).
 - `enum`: tipo do enum gerado.
 - `lista` com `persistencia: agregado`: `[NomeTabelaFilha][]`, com o nome do campo em camelCase.
@@ -50,10 +76,11 @@ entidade referenciada para popular combo/switches, como qualquer FK.
 - Concatenar `${this.initConfig.urlBackend}${API_[NOME_TABELA_PLURAL]}` em cada método.
 - Não declarar `baseUrl`, `resourceUrl`, `/api` hardcoded nem chamada relativa pura.
 - Métodos: `listar()`, `buscar(id)`, `incluir(obj)`, `alterar(obj, id)`, `excluir(id)`.
+- Um método por ação customizada (`01-yaml-contrato.md`), com o nome em camelCase, dando `POST` em `${API}/${id}/[acao-kebab]` com body vazio e devolvendo a entidade atualizada.
 - Se houver pesquisa, criar `pesquisar(filtro)` chamando `GET /[nome-tabela-plural]/pesquisar`.
 - Pesquisa usa `HttpParams` com todos os campos preenchidos do objeto `filtro`.
 - Não usar parâmetros genéricos `campo` e `valor`.
-- Exportar interface `[NomeTabela]Filtro` com propriedades opcionais dos campos pesquisáveis. Subcampos de lista não entram no filtro.
+- Exportar interface `[NomeTabela]Filtro` com propriedades opcionais dos campos pesquisáveis — os de **qualquer** perfil, igual ao filter do backend. Subcampos de lista não entram no filtro.
 - Exportar constante `[NOME_TABELA]_CAMPOS_PESQUISA` com `{ campo, label, tipo, enumLabels? }`.
 
 ## Critérios de aceite

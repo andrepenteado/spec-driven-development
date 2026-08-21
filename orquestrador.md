@@ -33,12 +33,12 @@ apenas o padrão de logs de `11-monitoramento-faro.md`.
 1. Escanear `.cruds/*.yaml`, ignorando `*.generated.yaml`.
 2. Validar cada YAML conforme `01-yaml-contrato.md`.
 3. Inspecionar o projeto real e identificar padrões existentes.
-4. Apresentar relatório com status: `novo`, `existente`, `conflito` ou `invalido`.
+4. Apresentar relatório com status: `novo`, `existente`, `conflito` ou `invalido`, listando os perfis e as ações de cada CRUD.
 5. Perguntar explicitamente quais CRUDs novos executar.
 6. Alterar código somente após confirmação do usuário.
 7. Gerar backend, depois frontend.
 8. Criar `.cruds/[nome-crud].generated.yaml` apenas após sucesso.
-9. Informar arquivos criados/alterados e validações executadas.
+9. Informar arquivos criados/alterados, validações executadas, campos `obrigatorio: true` ocultos para algum perfil que possa incluir e **o que foi implementado a partir do `prompt` de cada `regra` e de cada ação customizada**.
 
 ## Regras de precedência
 
@@ -53,4 +53,6 @@ apenas o padrão de logs de `11-monitoramento-faro.md`.
 - Todas as specs aplicáveis foram usadas.
 - Backend e frontend compartilham os mesmos nomes derivados, endpoints, labels, filtros e enums.
 - Cada campo `tipo: lista` gerou tabela e entidade filhas nos dois lados, com service e resource próprios apenas quando `persistencia: independente`, e nunca rota ou menu.
+- O CRUD é um só, parametrizado por perfil em tempo de execução, sem duplicar arquivo algum.
+- As ações de `tabela.acoes` chegaram ao `@Secured` do service, não só aos botões da tela.
 - O manifesto `.generated.yaml` foi criado somente depois da geração bem-sucedida.

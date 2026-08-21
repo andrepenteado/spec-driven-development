@@ -14,8 +14,34 @@ Criar enums, entidade, repository e filter QueryDSL.
 
 ## Enum Java
 
-- Criar enum para cada campo `enum`.
-- Incluir propriedade `descricao` e getter.
+- Criar um enum por bloco `enum` (`01-yaml-contrato.md`), em
+  `[pacote-base].domain.enums`, com o nome de `enum.nome`.
+- Uma constante por chave de `enum.valores`, na ordem do YAML, com o label como
+  `descricao`.
+- Incluir propriedade `descricao`, construtor e getter.
+
+```java
+public enum SituacaoPedido {
+
+    ABERTO("Aberto"),
+    FATURADO("Faturado"),
+    CANCELADO("Cancelado");
+
+    private final String descricao;
+
+    SituacaoPedido(String descricao) {
+        this.descricao = descricao;
+    }
+
+    public String getDescricao() {
+        return descricao;
+    }
+
+}
+```
+
+- Enum já existente com o mesmo nome é **reaproveitado**, nunca sobrescrito
+  (`01-yaml-contrato.md`).
 
 ## Entidade JPA
 
@@ -23,12 +49,18 @@ Criar enums, entidade, repository e filter QueryDSL.
 - `id` deve ser `Long`.
 - Não usar `@Table`, salvo padrão obrigatório do projeto.
 - `unique`: usar `@Column`.
-- `obrigatorio`: `@NotBlank` para string; `@NotNull` para demais.
+- `obrigatorio`: `@NotBlank` para os tipos de texto (`texto`, `textoN`, `editor`, `email`, `link`); `@NotNull` para demais.
 - Mensagem: `[label_campo] é um campo obrigatório`.
 - `fk`: `@ManyToOne` e `@JoinColumn(name = "fk_[nometabelareferenciadasemseparador]")`.
-- `textoN`: `String` com `@Column(columnDefinition = "TEXT")`.
+- `textoN` e `editor`: `String` com `@Column(columnDefinition = "TEXT")`. Em `editor` o
+  conteúdo é HTML produzido pelo CKEditor; o backend guarda e devolve como veio, sem
+  sanitizar nem reformatar.
+- `email`: `String` com `@Email(message = "[label_campo] inválido")` do Jakarta Validation.
+- `moeda`: `java.math.BigDecimal` com `@Column(precision = 15, scale = 2)`. Nunca `double`, `float`, `Double` ou `Float` — ponto flutuante binário erra centavos em soma e comparação.
+- `link`: `String` com `@URL(message = "[label_campo] inválido")` de `org.hibernate.validator.constraints`. Se o projeto não tiver o Hibernate Validator disponível, usar `@Pattern` com expressão para URL absoluta `http`/`https`, mantendo a mesma mensagem.
+- A validação de formato é independente de `obrigatorio`: campo opcional em branco não pode acusar formato inválido — `@Email` e `@URL` já ignoram nulo e vazio.
 - `foto`/`arquivo`: mapear como a **UUID** do anexo — campo `java.util.UUID` com `@Column(name = "fk_[nomecampo]")` e FK para `upload(uuid)`. Não usar `@ManyToOne` para `Upload`, pois a lib APcore não fornece o metamodelo `QUpload` exigido pelo QueryDSL ao varrer a entidade.
-- `enum`: `@Enumerated(EnumType.STRING)`.
+- `enum`: campo do tipo do enum gerado, com `@Enumerated(EnumType.STRING)`. Nunca `EnumType.ORDINAL`: ele grava a posição da constante, e inserir um valor no meio da lista muda o significado dos registros já gravados.
 - Incluir auditoria, `Serializable`, `serialVersionUID` e `toString()`.
 - `equals`/`hashCode` por `id`: usar `@EqualsAndHashCode(of = "id")` do Lombok (a entidade já usa `@Data`/`@Getter`/`@Setter` do Lombok, salvo padrão diferente do projeto) em vez de escrever os métodos manualmente. Para chave composta (ex.: mais de um campo `unique` juntos), listar os campos em `of = {"campo1", "campo2"}`.
 
@@ -110,7 +142,9 @@ O filho é entidade de primeira classe; o pai não o agrega.
 
 ## Filter QueryDSL
 
-Criar apenas se houver `pesquisavel != false`.
+Criar apenas se houver `pesquisavel != false`. Entram no filter os campos
+pesquisáveis para **qualquer** perfil (`01-yaml-contrato.md`): o filter é a união, e é
+a tela que decide quais filtros exibir.
 
 - Classe em `[pacote-base].domain.filter.[NomeTabela]Filter`.
 - Propriedades para todos os campos pesquisáveis. Subcampos de lista nunca são
@@ -123,7 +157,7 @@ Criar apenas se houver `pesquisavel != false`.
 - Ignorar nulos, strings em branco e enums não selecionados.
 - Combinar filtros com `AND`.
 - `exato`: igualdade.
-- `contem`: parcial case-insensitive, apenas para string.
+- `contem`: parcial case-insensitive, apenas para os tipos de texto (`texto`, `textoN`, `editor`, `email`, `link`).
 - Não usar reflexão.
 - Se QueryDSL não estiver configurado, adicionar dependências/configuração compatíveis com Java 25, Spring Boot 4 e Jakarta.
 

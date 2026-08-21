@@ -13,6 +13,8 @@ Criar endpoints REST do CRUD.
 - Endpoint base: `[nome-tabela-plural]`.
 - Usar `@Observed` na classe.
 - Resource não participa da auditoria.
+- Resource não repete `@Secured`: a autorização por ação (`tabela.acoes`) fica no
+  service (`04-backend-service.md`), que é onde a regra de negócio vive.
 - Retornar objetos diretamente, salvo padrão diferente do projeto.
 - Logar endpoint, parâmetros e `tabela.label`.
 
@@ -26,8 +28,15 @@ Criar endpoints REST do CRUD.
 | `POST` | `/[nome-tabela-plural]` | `servico.incluir(obj)` |
 | `PUT` | `/[nome-tabela-plural]/{id}` | `servico.alterar(obj, id)` |
 | `DELETE` | `/[nome-tabela-plural]/{id}` | `servico.excluir(id)` |
+| `POST` | `/[nome-tabela-plural]/{id}/[acao-kebab]` | `servico.[acao](id)`, uma por ação customizada |
 
-Crie `/pesquisar` somente se houver campo pesquisável. Receba `[NomeTabela]Filter filtro` por binding de query params, sem request body e sem parâmetros genéricos `campo`/`valor`.
+Crie `/pesquisar` somente se houver campo pesquisável para algum perfil
+(`01-yaml-contrato.md`).
+
+Cada item de `tabela.acoes-customizadas` gera um `POST` em `/{id}/[acao-kebab]`, **sem
+request body**: a ação é um comando sobre um registro. `POST` porque muda estado sem
+ser substituição do recurso (`PUT`) nem edição de campo (`PATCH`). O retorno é a
+entidade atualizada. Receba `[NomeTabela]Filter filtro` por binding de query params, sem request body e sem parâmetros genéricos `campo`/`valor`.
 
 ## Listas (`tipo: lista`)
 
@@ -58,5 +67,6 @@ Criar `[NomeTabelaFilha]Resource`, com `@Observed` e os mesmos padrões de log:
 - Endpoints delegam ao service correto.
 - `/pesquisar` usa filter QueryDSL.
 - Não existe recebimento de usuário/autenticação para auditoria no resource.
+- Cada ação customizada tem um `POST /{id}/[acao]` que só delega ao service.
 - Lista `agregado` não gerou nenhum endpoint; lista `independente` gerou os cinco
   acima, com a listagem em `por-[pai]/{id}`.

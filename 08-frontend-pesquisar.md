@@ -17,7 +17,7 @@ em `00-contexto-geral.md` e valem aqui sem repetição.
 - Não declarar loader na tela: o `<ngx-spinner>` é único por aplicação, no `app.component`, e o `PesquisarBaseComponent` o aciona via `NgxSpinnerService`. A tela começa direto pelo breadcrumb.
 - Renderizar o breadcrumb fora do container principal, iniciando com link para `/pagina-inicial` contendo ícone FontAwesome `fa-house` antes do texto `Início`, seguido de `tabela.plural`.
 - Após o breadcrumb, encapsular o restante do conteúdo visual da tela em `<section class="container py-3">`.
-- Header com `kicker`, ícone `fa-table-list`, título `tabela.plural` em negrito, subtítulo curto e botão `Novo`.
+- Header com `kicker`, ícone `fa-table-list`, título `tabela.plural` em negrito, subtítulo curto e botão `Novo`. Com `acoes`, o `Novo` fica em `@if (config.acoes.incluir)`.
 - Dashboard opcional com até 3 cards úteis; ocultar em dispositivos pequenos.
 - Card de consulta com botão `Filtrar Pesquisa` no lado esquerdo do header, substituindo título textual da seção.
 - Filtros começam escondidos em `collapse filters-collapse`.
@@ -26,22 +26,36 @@ em `00-contexto-geral.md` e valem aqui sem repetição.
 ## Filtros
 
 - Renderizar todos os campos com `pesquisavel != false`. Cada campo tem controle próprio.
+- Com `por-perfil`, envolver o controle de cada filtro em
+  `@if (campo('nomeDoCampo').pesquisavel)`. O objeto `filtro` e o `pesquisar(filtro)`
+  do service continuam com **todos** os campos pesquisáveis do CRUD — só o controle
+  some.
 - Não usar `<label>` visível nos filtros escondidos; identificar cada campo somente por `placeholder`, `aria-label` e/ou texto da primeira opção.
 - Manter campos e botões do formulário de filtros na mesma linha em viewports médios e grandes, usando `row`, `align-items-center` e colunas Bootstrap adequadas.
 - Botões de pesquisar e limpar nos filtros devem ser icon-only, com `title` e `aria-label`; não incluir texto visível.
-- Texto: input texto.
-- Enum: combo/select com labels.
+- Texto (`texto`, `textoN`, `editor`, `email`, `link`): input texto. Em `email` e `link` o filtro é texto comum, sem `type="email"`/`type="url"` — o usuário filtra por trecho, não digita um endereço completo. Em `editor`, a busca é sobre o HTML armazenado (`01-yaml-contrato.md`).
+- Enum: combo/select com os labels de `[NOME_ENUM]_LABELS` (`07-frontend-domain-service.md`), com uma primeira opção vazia identificando o campo.
 - FK: `ng-select` com `class="ng-select-bootstrap"` para receber o tema global Bootstrap-like do projeto. Vale mesmo quando o campo usa `fk-tipo: radio` no cadastro — `fk-tipo` não afeta o filtro.
-- Boolean/date/datetime/number: controle compatível.
+- `booleano`, `data`, `data-hora` e numéricos: controle compatível.
+- `moeda`: input com a mesma máscara do cadastro (`09-frontend-cadastro.md`), sem o `input-group` de `R$` — o filtro escondido é compacto e o `placeholder` já identifica o campo.
 
 ## Grid
 
 - `<table id="datatables-pesquisar-[nome-tabela-plural]">`.
 - Ordem fixa: `Ações`, `ID`, coluna principal, demais campos `exibe-grid: true`.
+- `exibe-grid` é `false` por padrão (`01-yaml-contrato.md`): entram no grid só os campos marcados. `Ações` e `ID` são fixas e não dependem da marcação; a coluna principal é o primeiro campo marcado.
 - Coluna principal usa `record-cell`, `record-main` e `record-sub`; ID nunca entra em main/sub.
 - Coluna principal deve incluir um ícone FontAwesome à esquerda, coerente com a entidade ou com fallback `fa-tag`.
 - Ações usam `action-stack`, editar `fa-pen-to-square`, excluir `fa-trash-can`.
-- Enum mostra label; FK mostra `fk-display`; boolean mostra Sim/Não.
+- Com `por-perfil`, envolver `<th>` e `<td>` de cada coluna opcional no mesmo
+  `@if (campo('nomeDoCampo').exibeGrid)`. Os dois precisam usar exatamente a mesma
+  condição, ou o DataTables recebe cabeçalho e corpo com contagens diferentes de
+  colunas e quebra. `Ações` e `ID` nunca são condicionais.
+- Enum mostra o label de `[NOME_ENUM]_LABELS`, nunca a constante crua; FK mostra `fk-display`; `booleano` mostra Sim/Não.
+- `email` vira `<a href="mailto:...">` com ícone `fa-envelope`; `link` vira `<a target="_blank" rel="noopener noreferrer">` com ícone `fa-arrow-up-right-from-square`. Nos dois, o clique **não** pode disparar a navegação da linha: usar `(click)="$event.stopPropagation()"` no `<a>`.
+- `editor` mostra o conteúdo **sem as tags HTML**, truncado com `text-truncate` e o texto completo no `title`. Nunca renderizar o HTML dentro da célula.
+- `moeda` usa `CurrencyPipe` com `'BRL'` e locale `pt-BR` (`{{ item.valor | currency:'BRL':'symbol':'1.2-2':'pt-BR' }}`), com `<th>` e `<td>` em `text-end`. O locale `pt-BR` precisa estar registrado uma vez na aplicação (`registerLocaleData`), como já vale para as datas.
+- Valor longo de `link` não pode alargar a tabela: truncar com `text-truncate` e `d-inline-block` com largura máxima, mantendo o endereço completo no `title`.
 - Campo `tipo: lista` nunca vira coluna do grid, nem seus subcampos.
 
 ## Pesquisa
@@ -72,6 +86,51 @@ inteira e faz paginação, ordenação e busca rápida **client-side**.
   evolução futura. Enquanto isso, toda tela gerada estende `PesquisarBaseComponent` e
   renderiza as linhas pelo Angular (`@for`), nunca por `render`/`columns` do DataTables.
 
+## Configuração por perfil
+
+Só quando o YAML tem `tabela.acoes` ou algum `por-perfil` (`01-yaml-contrato.md`). A
+tela é **uma só**: os mesmos arquivos servem todos os perfis, e o que muda é quais
+ações, filtros e colunas aparecem.
+
+- Injetar `LoginService` e resolver a configuração na construção do componente,
+  conforme `06-frontend-rotas-menu-api.md`.
+- `campo(nome)` decide filtro (`pesquisavel`) e coluna (`exibeGrid`);
+  `config.acoes` decide os botões.
+
+### Ações no grid
+
+| Ação | Efeito na tela |
+|---|---|
+| `incluir` | `@if` no botão `Novo` do header |
+| `alterar` | primeira ação da linha vira `Editar` (`fa-pen-to-square`) |
+| `excluir` | `@if` na ação de excluir da linha (`fa-trash-can`) |
+
+- Sem `alterar`, a primeira ação da linha continua existindo, mas como
+  **`Visualizar`**: ícone `fa-eye`, `title`/`aria-label` `Visualizar`, mesma navegação
+  para `cadastro/:id`. Quem consulta precisa abrir o registro; é o cadastro que fica
+  somente leitura (`09-frontend-cadastro.md`).
+
+### Ações customizadas
+
+Ação customizada com `tela: pesquisa` ou `tela: ambos` (`01-yaml-contrato.md`) vira mais
+um botão no `action-stack` da linha, depois de editar e excluir. A propriedade `aba` da
+ação não vale aqui — ela posiciona o botão no cadastro, e a pesquisa não tem abas:
+
+- `@if (config.acoesCustomizadas['revogar'])` no botão, com o `icone` e o `label` da
+  ação em `title`/`aria-label`. Botão icon-only, como os demais da linha.
+- `confirmar: true` (default): `exibirMensagem.showConfirm(...)` antes de chamar o
+  service, com a mensagem `Confirma [label] [de/do/da] [entidade] [identificação]`.
+- No sucesso, toastr de sucesso e `this.pesquisar()` (herdado) para recarregar só a
+  lista. Nunca `window.location.reload()`.
+- No erro, cuidar apenas de estado local: o `httpErrorsInterceptor` já mostra o 409/422
+  que a regra de negócio devolve (`04-backend-service.md`).
+- A coluna `Ações` e a `<th>` dela nunca são condicionais: `consultar` sempre rende ao
+  menos o `Visualizar`.
+- `listar()`, `pesquisar()`, `excluirRegistro()` e o service **não** mudam: a
+  configuração por perfil não altera o que a tela busca no backend, só o que mostra.
+- Nada de gerar uma segunda tela, um segundo componente ou um segundo `basePath` por
+  perfil.
+
 ## Componente
 
 - `standalone: true`.
@@ -96,10 +155,14 @@ inteira e faz paginação, ordenação e busca rápida **client-side**.
 - Componente declara `changeDetection: ChangeDetectionStrategy.Eager`.
 - Cards de dashboard não aparecem em dispositivos pequenos.
 - Filtros refletem exatamente os campos pesquisáveis do YAML, sem labels visíveis, com placeholders identificando os campos.
+- Com configuração por perfil, filtros e colunas refletem os perfis do usuário logado, `<th>` e `<td>` usam a mesma condição, e existe uma única tela de pesquisa para todos os perfis.
+- `Novo` e `Excluir` só aparecem para quem tem a ação; sem `alterar`, a ação da linha é `Visualizar` com `fa-eye`.
+- Ação customizada com `tela` incluindo `pesquisa` aparece na linha, confirma antes e recarrega a lista no sucesso.
 - Campos e botões dos filtros permanecem na mesma linha em telas médias e grandes, e os botões exibem somente ícones, com acessibilidade por `title` e `aria-label`.
 - A tela estende `PesquisarBaseComponent`.
 - Pesquisar chama `/pesquisar` no backend; não há filtro em memória sobre `this.lista` nem DataTables server-side.
 - Grid respeita ordem fixa das colunas e a coluna principal exibe ícone à esquerda, título e subtítulo.
+- Coluna de `email` e `link` é clicável, não dispara a navegação da linha, e `link` abre em nova aba com `rel="noopener noreferrer"`.
 - Segunda execução de pesquisa, limpeza de filtros e recarregamento após exclusão atualizam o grid corretamente, inclusive quando a nova lista contém registros diferentes dos exibidos na consulta anterior.
 - Loader não desaparece antes do grid estar inicializado.
 - Operações de listar, pesquisar e excluir logam com `console.info` no padrão de `11-monitoramento-faro.md`.

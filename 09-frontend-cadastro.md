@@ -35,26 +35,111 @@ conteúdo, em `nav nav-pills` com `nav-link rounded-pill px-3` e ícone por aba.
 - Ids derivados do título em kebab-case sem acentos: `aba-[slug]-tab` no botão e `aba-[slug]` no `tab-pane` (ex.: `Dados cadastrais` → `aba-dados-cadastrais`).
 - A primeira aba nasce `active`.
 - Manter o `nav nav-pills` mesmo quando houver uma única aba.
+- Com configuração por perfil, a aba só é renderizada se **ao menos um** dos campos
+  dela estiver visível para o usuário: `@if` no botão e no `tab-pane`, com a mesma
+  condição. Aba de lista segue `config.listas['nomeDaLista'].consultar`. A primeira
+  aba **visível** recebe `active`.
 
 ## Campos
 
 - Formulário reativo.
-- `colunas-layout`: `0` oculta; `N` usa Bootstrap; `N*` encerra linha; ausente usa largura confortável.
+- `colunas-layout`: `N` usa Bootstrap; `N*` encerra linha; ausente usa largura confortável. **Nunca varia por perfil** (`01-yaml-contrato.md`): a classe Bootstrap e o fechamento da `row` são escritos uma vez no template, valendo para todos.
+- `exibe-formulario: false` não renderiza o campo. É a única diferença de formulário entre perfis: um `@if` em volta do bloco do campo, dentro da mesma linha, com os vizinhos fluindo normalmente.
 - Labels dos campos devem usar negrito (`fw-semibold`).
 - Campos obrigatórios devem ter o label inteiro em vermelho usando `required-label` e exibir o ícone `fa-circle-exclamation help-dot` também em vermelho.
 - Inputs com ícone usam `input-group` e `input-group-text` quando fizer sentido.
 - `mask` aplica atributo `mask`.
-- `somente-leitura: true` exibe o campo sem permitir edição (ver "Campos somente leitura").
-- `enum` usa radio buttons com labels.
-- `boolean` usa checkbox/toggle.
+- Campo cujo perfil está fora de `edicao` aparece sem permitir edição (ver "Campos sem edição").
+- Com configuração por perfil, cada campo é envolvido em
+  `@if (campo('nomeDoCampo').exibeFormulario)` e o bloqueio de edição passa a vir de
+  `campo('nomeDoCampo').somenteLeitura` (ver "Configuração por perfil").
+- `enum` usa radio buttons com os labels de `[NOME_ENUM]_LABELS` (`07-frontend-domain-service.md`), um por constante, na ordem do YAML. Com `obrigatorio: true`, `required` nos inputs e `invalid-feedback` na última opção.
+- `booleano` usa checkbox/toggle.
 - `textoN` usa `<textarea>` com `rows="N"` (N = número no sufixo do tipo, ex.: `texto3` → 3 linhas) e ocupa a largura do `colunas-layout`. Textarea e campos longos ocupam `col-12`.
+- `editor` usa o componente do CKEditor 5 (ver "Campo de texto rico").
+- `moeda` usa `<input type="text">` em `input-group`, com `input-group-text` `R$` antes do campo, `class="form-control text-end"` e a máscara de moeda do ngx-mask: `mask="separator.2"`, `thousandSeparator="."` e `decimalMarker=","`. Não usar `type="number"`: ele ignora a máscara e mostra as setas de incremento, que não fazem sentido em dinheiro.
+- `email` usa `<input type="email">` em `input-group` com `input-group-text` e ícone `fa-envelope`, mais `Validators.email` no `FormControl`.
+- `link` usa `<input type="url">` em `input-group` com `input-group-text` e ícone `fa-link`, mais um validador de URL absoluta (`http`/`https`) no `FormControl`, com `placeholder="https://"`.
+- Em `email` e `link`, a mensagem de formato é `[label] inválido`, em `invalid-feedback` própria, separada da mensagem de campo obrigatório: obrigatório e formato inválido são erros diferentes e o usuário precisa saber qual dos dois ocorreu.
 - `foto`: exibe miniatura (thumbnail) da imagem; clicar na miniatura abre o diálogo para incluir/editar. Usa `UploadService` de `@andre.penteado/ngx-apcore` e preview `data:[tipoMime];base64,[base64]`.
 - O campo `foto` deve ficar **sempre centralizado verticalmente** em relação aos demais campos da mesma linha: usar `align-items-center` na `row` e centralizar a miniatura na coluna (`d-flex flex-column align-items-center justify-content-center`), dando à linha um aspecto de portfólio.
 - `arquivo`: campo de upload simples (seletor de arquivo mostrando o nome), sem miniatura, também via `UploadService`.
 
-## Campos somente leitura (`somente-leitura`)
+## Campo de texto rico (`editor`)
 
-`somente-leitura: true` (`01-yaml-contrato.md`) mantém o campo no formulário, na
+`editor` (`01-yaml-contrato.md`) renderiza o **CKEditor 5** ligado ao formulário
+reativo.
+
+### Instalação, uma vez por projeto
+
+```bash
+npm install ckeditor5 @ckeditor/ckeditor5-angular
+```
+
+- Importar `CKEditorModule` de `@ckeditor/ckeditor5-angular` nos `imports` do
+  componente standalone.
+- Importar `ClassicEditor` e os plugins de `ckeditor5` (pacote único, não os antigos
+  `@ckeditor/ckeditor5-*` por plugin).
+- Importar `ckeditor5/ckeditor5.css` no `styles.css` global do projeto, seguindo a
+  regra de CSS compartilhado de `00-contexto-geral.md`.
+- `licenseKey: 'GPL'` na configuração: a partir da v44 o CKEditor exige a chave
+  declarada explicitamente para uso sob GPL.
+- Configurar o `language` para `pt-br` e importar a tradução correspondente, para a
+  barra de ferramentas sair em português como o resto da tela.
+
+### No componente
+
+```ts
+protected readonly Editor = ClassicEditor;
+
+protected readonly configEditor = {
+  licenseKey: 'GPL',
+  language: 'pt-br',
+  plugins: [ Essentials, Paragraph, Bold, Italic, Link, List, Heading ],
+  toolbar: [ 'heading', '|', 'bold', 'italic', 'link', 'bulletedList', 'numberedList', '|', 'undo', 'redo' ]
+};
+```
+
+```html
+<ckeditor [editor]="Editor" [config]="configEditor" formControlName="preambulo"
+          (ready)="aoPrepararEditor($event)"></ckeditor>
+```
+
+- O componente implementa `ControlValueAccessor`, então `formControlName` funciona como
+  em qualquer controle.
+- Ocupa `col-12` na linha, como `textoN`: barra de ferramentas em coluna estreita fica
+  ilegível.
+- Toolbar enxuta é o padrão. Só inclua o plugin que a tela precisa — cada um entra no
+  bundle.
+
+### Bloqueio de edição
+
+Perfil fora de `edicao`, ou tela sem `podeGravar`, usa o **read-only do próprio
+CKEditor**, no evento `ready`:
+
+```ts
+protected aoPrepararEditor(editor: any): void {
+  if (this.campo('preambulo').somenteLeitura || !this.podeGravar) {
+    editor.enableReadOnlyMode('perfil');
+  }
+}
+```
+
+- **Não** usar `[disabled]` no `<ckeditor>` nem `disable()` no `FormControl`: valem as
+  mesmas razões da seção "Campos sem edição" — `form.value` omitiria o campo e o HTML
+  iria vazio para o backend.
+- `enableReadOnlyMode` exige um identificador de trava (`'perfil'`, acima); libere com
+  `disableReadOnlyMode` usando o mesmo identificador, se a tela precisar reabilitar.
+
+### Renderização do conteúdo fora do editor
+
+O valor é HTML vindo do banco. Ao exibi-lo em outro lugar que não o CKEditor, usar
+`[innerHTML]`, que o Angular sanitiza. **Nunca** `bypassSecurityTrustHtml`: o conteúdo
+foi digitado por um usuário e é exatamente o vetor que a sanitização existe para barrar.
+
+## Campos sem edição (`edicao`)
+
+Perfil fora de `edicao` (`01-yaml-contrato.md`) mantém o campo no formulário, na
 posição do `colunas-layout`, bloqueando apenas a edição.
 
 - **Nunca usar o estado `disabled` do `FormControl`** (`disable()` ou
@@ -67,14 +152,15 @@ posição do `colunas-layout`, bloqueando apenas a edição.
 
 | Controle | Como bloquear |
 |---|---|
-| `input`, `textarea` (`string`, `textoN`, numéricos, datas, com ou sem `mask`) | atributo `readonly` e classe `bg-body-secondary` para deixar claro que não é editável |
+| `input`, `textarea` (`texto`, `textoN`, `email`, `link`, numéricos, datas, com ou sem `mask`) | atributo `readonly` e classe `bg-body-secondary` para deixar claro que não é editável |
 | `ng-select` (`fk-tipo: combo`) | `[readonly]="true"` no próprio `ng-select` |
-| radio de `enum`, switches de `fk-tipo: radio`, checkbox de `boolean` | envolver o grupo em `div.pe-none` com `aria-disabled="true"` e `tabindex="-1"` nos inputs — `readonly` não funciona em radio/checkbox |
+| radio de `enum`, switches de `fk-tipo: radio`, checkbox de `booleano` | envolver o grupo em `div.pe-none` com `aria-disabled="true"` e `tabindex="-1"` nos inputs — `readonly` não funciona em radio/checkbox |
 | `foto`, `arquivo` | mostrar só a miniatura ou o nome do anexo (com download, quando fizer sentido); não renderizar o seletor de arquivo nem a ação de trocar/remover |
 
-- `colunas-layout: 0`: o campo não é renderizado e `somente-leitura` não muda nada.
-- Não é barreira de segurança: a validação de quem pode alterar o quê é do backend
-  (`04-backend-service.md`).
+- `exibe-formulario: false`: o campo não é renderizado e `edicao` não muda nada na tela — mas continua barrando a escrita no service.
+- A tela e o service leem o mesmo `edicao`: o backend repõe o valor anterior do campo
+  que o perfil não edita (`04-backend-service.md`). Bloquear no template não é o que
+  protege — é o que evita oferecer ao usuário uma edição que o service descartaria.
 
 ## Resumo no título (`exibe-titulo`)
 
@@ -97,14 +183,18 @@ da tela, abaixo do título e do subtítulo, com a fonte de subtítulo:
 - O valor vem do **`FormControl`**, não da entidade carregada: assim a linha
   acompanha o que está na tela, inclusive depois de gravar.
 - Formatação igual à do grid da pesquisa: `enum` mostra o label, `fk` mostra o
-  `fk-display`, `boolean` mostra Sim/Não, datas usam o formato pt-BR e `decimal`
-  usa o separador pt-BR.
+  `fk-display`, `booleano` mostra Sim/Não, datas usam o formato pt-BR, `decimal` usa o
+  separador pt-BR, `moeda` usa `CurrencyPipe` com `'BRL'` e `email`/`link` saem
+  clicáveis, com as mesmas regras de `target` e `rel` do grid
+  (`08-frontend-pesquisar.md`).
 - Valor `null`, `undefined` ou string vazia: o item some, junto com o separador
   vizinho. Sem nenhum valor preenchido (modo inclusão, tipicamente), a linha
   inteira não é renderizada — envolver o bloco em `@if`.
-- O campo **continua** no formulário conforme o `colunas-layout`; `colunas-layout: 0`
-  é o que deixa o valor só no cabeçalho.
+- O campo **continua** no formulário conforme o `colunas-layout`;
+  `exibe-formulario: false` é o que deixa o valor só no cabeçalho.
 - A linha não substitui o subtítulo de `subtituloFormulario()`: vem depois dele.
+- Com configuração por perfil, cada item da linha é condicionado a
+  `campo('nomeDoCampo').exibeTitulo`, além da checagem de valor preenchido.
 
 ## Campos de relacionamento (`fk-tipo`)
 
@@ -225,8 +315,8 @@ protected override aposCarregar(paciente: Paciente): void {
 
 - Tabela simples (`table table-hover align-middle`) em `div.table-responsive`. **Sem DataTables** e sem `id="datatables-..."`: o conteúdo é uma coleção pequena, em memória.
 - **1ª coluna: apenas o botão Excluir** (`action-stack`, `btn btn-outline-danger btn-sm`, ícone `fa-trash-can`, com `title` e `aria-label`). Não há edição de linha; para corrigir, exclui e adiciona de novo.
-- Demais colunas: um por subcampo com `exibe-grid: true`, na ordem do YAML, com o `label` do subcampo no cabeçalho.
-- Enum mostra label; FK mostra `fk-display`; boolean mostra Sim/Não; datas usam o formato pt-BR — mesmas regras do grid da pesquisa.
+- Demais colunas: um por subcampo com `exibe-grid: true`, na ordem do YAML, com o `label` do subcampo no cabeçalho. O default é `false`, como no grid da pesquisa (`01-yaml-contrato.md`).
+- Enum mostra label; FK mostra `fk-display`; `booleano` mostra Sim/Não; datas usam o formato pt-BR; `email` e `link` saem clicáveis; `moeda` usa `CurrencyPipe` com `'BRL'`, na coluna alinhada à direita — mesmas regras do grid da pesquisa.
 - Subcampo `foto` mostra a miniatura; `arquivo` mostra o nome do anexo e ganha um botão de download na 1ª coluna, ao lado do Excluir, quando o registro já estiver persistido.
 - Lista vazia: no lugar da tabela, `<div class="alert alert-light border mb-0">Nenhum registro adicionado em [lista.label].</div>`.
 
@@ -253,6 +343,131 @@ O modal:
 - `modal fade` com `modal-dialog modal-lg`, header com `lista.label` e botão de fechar, body com o subformulário e footer com `Cancelar` (`btn btn-light`, `data-bs-dismiss="modal"`) e `Adicionar` (`btn btn-primary`).
 - Fechar depois de adicionar sem depender da API JS do Bootstrap: manter um botão oculto com `data-bs-dismiss="modal"` e acioná-lo por `@ViewChild` após a inclusão bem-sucedida (em `independente`, dentro do `next` do service). Se a validação falhar, o modal continua aberto.
 
+## Configuração por perfil
+
+Só quando o YAML tem `tabela.acoes`, `lista.acoes` ou algum `por-perfil`
+(`01-yaml-contrato.md`). A tela é **uma só**: os mesmos arquivos servem todos os
+perfis, e o que muda é quais campos aparecem, quais são editáveis e se dá para gravar.
+
+- Injetar `LoginService` e resolver a configuração na construção do componente,
+  conforme `06-frontend-rotas-menu-api.md`.
+- O `FormGroup` continua declarando **todos** os campos da união, com os mesmos
+  `Validators` — inclusive os ocultos para o perfil. O valor que veio do backend
+  precisa voltar intacto no `Gravar`, e é isso que evita que um perfil apague dados
+  que nem enxerga.
+- Pelo mesmo motivo, **nunca** remover controle do `FormGroup`, nem usar `disable()`,
+  para ocultar campo de um perfil: `form.value` omitiria o controle e o campo iria
+  vazio para o backend. Ocultar é decisão de template.
+- `campo(...).somenteLeitura` é o `edicao` do YAML já resolvido para o usuário: a
+  tabela de bloqueio da seção "Campos sem edição" continua valendo, trocando o valor
+  fixo pelo binding.
+
+```html
+@if (campo('desconto').exibeFormulario) {
+  <div class="col-md-4">
+    <label class="form-label fw-semibold" for="desconto">Desconto</label>
+    <input id="desconto" type="text" class="form-control" formControlName="desconto"
+           [readonly]="campo('desconto').somenteLeitura"
+           [class.bg-body-secondary]="campo('desconto').somenteLeitura">
+  </div>
+}
+```
+
+- Grupos de `enum`, switches de `fk-tipo: radio` e checkbox de `booleano` usam
+  `[class.pe-none]="campo('x').somenteLeitura"` e
+  `[attr.aria-disabled]="campo('x').somenteLeitura || null"`, em vez do `div.pe-none`
+  fixo.
+- Aba com todos os campos ocultos não é renderizada (ver "Abas"). Aba de lista some
+  quando o campo `tipo: lista` está oculto para o perfil; a coleção continua chegando
+  no payload e é gravada como veio.
+### Ações no cadastro
+
+`podeGravar` é a única derivação que a página precisa fazer: depende do modo da tela.
+
+```ts
+protected get podeGravar(): boolean {
+  return this.incluir ? this.config.acoes.incluir : this.config.acoes.alterar;
+}
+```
+
+- `Gravar` fica em `@if (podeGravar)`. `Voltar` é sempre exibido.
+- **Sem `podeGravar`, a tela inteira é somente leitura**, independente do `edicao` de
+  cada campo: o bloqueio de cada controle passa a ser
+  `campo('x').somenteLeitura || !podeGravar`. Não faz sentido oferecer edição num
+  formulário que não pode ser enviado.
+- Modo inclusão sem a ação `incluir`: o `crudRoutes()` protege as três rotas com os
+  mesmos perfis e não separa a de inclusão (`06-frontend-rotas-menu-api.md`), então a
+  barreira fica aqui — em `ngOnInit`, antes de montar a tela, mostrar toastr de
+  atenção e navegar de volta para a pesquisa.
+- O texto curto sobre obrigatórios à esquerda dos botões some junto com o `Gravar`:
+  sem edição não há campo obrigatório a preencher.
+
+### Ações customizadas
+
+Ação customizada com `tela: cadastro` ou `tela: ambos` (`01-yaml-contrato.md`) vira mais
+um botão. Sem `aba`, ele fica na barra de botões, à direita, antes de `Voltar` e
+`Gravar`:
+
+```html
+@if (config.acoesCustomizadas['revogar'] && !incluir) {
+  <button type="button" class="btn btn-outline-danger" (click)="revogar()">
+    <i class="fa-solid fa-ban me-2"></i>Revogar
+  </button>
+}
+```
+
+- **Sempre `&& !incluir`**: a ação opera sobre um registro existente, e em modo de
+  inclusão ele ainda não tem id. É o mesmo motivo pelo qual a aba de lista
+  `independente` fica bloqueada antes do primeiro `Gravar`.
+- Com `aba` declarada, o botão sai da barra e vai para **o fim do conteúdo daquela
+  aba**, em `d-flex justify-content-end`, no lugar onde a aba de lista põe o
+  `+ Adicionar`. É onde a ação pertence quando ela age sobre o que a aba mostra — um
+  `Assinar` na aba `Assinatura`, um `Conferir` na aba de conferência.
+- O botão continua **fora** de qualquer `<form>` aninhado e não é `type="submit"`: ele
+  chama o service da ação, não o `gravar()` da tela.
+- Aba escondida para o perfil (todos os campos ocultos, ou lista sem `consultar`) leva
+  o botão junto. Se a ação precisa ficar disponível de qualquer forma, declare-a sem
+  `aba` — na barra de botões ela não depende de aba nenhuma.
+- `confirmar: true` (default): `exibirMensagem.showConfirm(...)` antes de chamar o
+  service.
+- No sucesso, toastr e `this.pesquisar(this.entidade.id)` (herdado da base) para
+  recarregar o registro — é ele que refaz `buscar` → `patchValue` → `aposCarregar`, e a
+  tela reflete o novo estado sem navegação.
+- No erro, cuidar apenas de estado local; o 409/422 da regra de negócio é mostrado pelo
+  `httpErrorsInterceptor`.
+- A ação **não** depende de `podeGravar` nem de `edicao`: ela é autorizada pelos
+  `perfis` dela e pode alterar campos que ninguém edita pela tela — um `revogar` muda a
+  `situacao` que tem `edicao: []`.
+
+### Ações das listas
+
+`config.listas['nomeDaLista']` governa cada aba de lista, com as regras de
+`lista.acoes` (`01-yaml-contrato.md`):
+
+| Ação | Efeito |
+|---|---|
+| `consultar` | `@if` na aba (botão e `tab-pane`). Sem ela, a aba não existe para o perfil |
+| `incluir` | `@if` no subformulário e no botão `+ Adicionar` (`sem-modal`) ou `Novo` (`modal`) |
+| `excluir` | `@if` no botão de excluir da primeira coluna da tabela da lista |
+
+- Sem `incluir`, a aba mostra só a seção interna e a tabela: vira uma aba de consulta
+  da coleção. A mensagem de lista vazia continua valendo.
+- Sem `incluir` e sem `excluir`, a primeira coluna da tabela fica vazia — nesse caso,
+  não renderizar a coluna (nem `<th>` nem `<td>`).
+- As ações da lista são independentes de `podeGravar` no que diz respeito a
+  `persistencia: independente`, onde adicionar e excluir chamam o service do filho na
+  hora. Em `agregado`, a coleção só é persistida no `Gravar`, então uma aba com
+  `incluir` num perfil sem `alterar` seria trabalho perdido — `lista.acoes` herda de
+  `tabela.acoes` justamente para isso não acontecer por descuido.
+
+### Regras gerais
+
+- Esconder botão **não** é segurança: quem barra é o `@Secured` por ação no service
+  (`04-backend-service.md`). A tela esconde para não oferecer um caminho que
+  terminaria em 403.
+- Nada de gerar um segundo componente, um segundo template ou um segundo `form` por
+  perfil.
+
 ## Botões
 
 - Fora do card, abaixo do form.
@@ -272,7 +487,7 @@ O modal:
 - Se o service do projeto expõe um único método `gravar(obj, incluir)` em vez de `incluir`/`alterar` separados, `incluirEntidade`/`alterarEntidade` viram um adaptador de uma linha cada, delegando para esse método com o booleano correspondente.
 - Hooks opcionais da base, usar somente quando a tela precisar:
   - `carregarListasAuxiliares()`: combos/listas carregadas na abertura da tela (ex.: lista de empresas para um `ng-select` de FK), independente de incluir/editar. **Devolva o `Observable` da carga** quando `aposCarregar` depender dessas listas — obrigatório com `fk-tipo: radio` e com FK dentro de lista. Devolver `void` mantém o comportamento não-bloqueante.
-  - `novaEntidade()`: registro em branco usado no modo inclusão (padrão `{}`); sobrescreva quando a tela precisar de uma instância real da classe de domínio.
+  - `novaEntidade()`: registro em branco usado no modo inclusão (padrão `{}`); sobrescreva quando a tela precisar de uma instância real da classe de domínio, ou quando alguma `regra` do YAML (`01-yaml-contrato.md`) definir valor inicial que a tela deve mostrar antes de gravar — a tela espelha, o service é quem garante.
   - `aposCarregar(entidade)`: repatch de campos que `patchValue` não resolve sozinho — FK cujo `FormControl` guarda o objeto inteiro (não só o id), `FormArray` de lista reconstruído a partir da coleção, campos derivados. É chamado **nos três momentos**: ao abrir em inclusão (com `novaEntidade()`), ao carregar para edição e após gravar com sucesso — por isso **deve ser idempotente** (recrie o `FormArray` com `setControl`, não acumule com `push`).
   - `antesGravar(valor)`: pré-processamento assíncrono do valor do form antes de incluir/alterar — ex.: subir o arquivo do campo `foto`/`arquivo` via `UploadService` e só então gravar a entidade com o UUID retornado.
 - Utilitários da base para listas (a partir de `@andre.penteado/ngx-apcore` >= 22.1.0), para não reescrever a mesma checagem em cada tela:
@@ -293,11 +508,18 @@ O modal:
 - Abas ficam dentro do mesmo card do formulário, têm ícone e seguem a ordem definida; campos sem `aba` estão em `Dados cadastrais`.
 - Seções internas do formulário têm ícone, título e subtítulo, e não há cards/forms lado a lado.
 - Labels dos campos aparecem em negrito; campos obrigatórios têm validação, label em vermelho e ícone de exclamação em vermelho.
-- Campo `somente-leitura: true` aparece no formulário, não aceita edição e chega gravado ao backend — nenhum `FormControl` desabilitado.
+- Campo fora do `edicao` do perfil aparece no formulário, não aceita edição e chega gravado ao backend com o valor anterior — nenhum `FormControl` desabilitado.
 - Campo `exibe-titulo: true` aparece como `label: valor` abaixo do título, com fonte de subtítulo, e some quando não há valor.
+- Campo `email` e `link` validam formato no cliente, com mensagem própria distinta da de obrigatório, e aparecem clicáveis no resumo do título.
+- Campo `moeda` usa máscara pt-BR com `R$` no `input-group`, alinhado à direita, e nunca `type="number"`.
+- Campo `editor` renderiza o CKEditor 5 ligado ao `FormControl`, ocupa `col-12`, e o bloqueio usa `enableReadOnlyMode`, nunca `disabled`.
 - FK com `fk-tipo: radio` renderiza switches mutuamente exclusivos e vem pré-selecionada ao editar.
 - Cada `tipo: lista` tem aba própria, tabela sem DataTables com Excluir na 1ª coluna, e o subformulário está fora do `FormGroup` principal e fora de um `<form>` aninhado.
 - Lista `agregado`: adicionar/excluir não chama o backend e a coleção é gravada junto com o registro do CRUD.
 - Lista `independente`: adicionar/excluir chama o service do filho, a exclusão confirma antes, e a aba fica bloqueada com aviso enquanto o CRUD ainda não foi gravado.
 - Botões finais são `Voltar` e `Gravar`.
+- Com configuração por perfil, existe uma única tela de cadastro para todos os perfis; o `FormGroup` tem todos os campos, nenhum controle é removido ou desabilitado, e aba sem campo visível não é renderizada.
+- `Gravar` só aparece para quem tem a ação do modo atual, e sem ela o formulário inteiro fica somente leitura.
+- Ação customizada com `tela` incluindo `cadastro` aparece na barra de botões, ou no fim da aba de `aba`, some em modo de inclusão, confirma antes e recarrega o registro no sucesso.
+- Aba de lista respeita `lista.acoes`: sem `consultar` não existe, sem `incluir` não tem subformulário, sem `excluir` não tem botão de excluir.
 - Operações de buscar e gravar logam com `console.info` no padrão de `11-monitoramento-faro.md`.

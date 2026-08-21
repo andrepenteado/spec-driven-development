@@ -19,7 +19,10 @@ Criar ou atualizar changelog Liquibase da tabela do CRUD.
 - Se o changelog da versão existir, adicionar `<changeSet>`.
 - `id`: data atual `YYYY-MM-DD`.
 - `author`: `autor`.
-- Tipos SQL: `string=VARCHAR`, `textoN=TEXT`, `integer=INTEGER`, `long=BIGINT`, `boolean=BOOLEAN`, `date=DATE`, `datetime=TIMESTAMP`, `decimal=NUMERIC`, `foto=UUID`, `arquivo=UUID`.
+- Tipos SQL: `texto=VARCHAR`, `textoN=TEXT`, `editor=TEXT`, `email=VARCHAR`, `link=VARCHAR`, `inteiro=INTEGER`, `longo=BIGINT`, `booleano=BOOLEAN`, `data=DATE`, `data-hora=TIMESTAMP`, `decimal=NUMERIC`, `moeda=NUMERIC(15,2)`, `foto=UUID`, `arquivo=UUID`.
+- `moeda` sempre com escala 2 declarada na coluna; nunca `FLOAT`, `REAL` ou `DOUBLE PRECISION`. A precisão pode subir de 15 quando o domínio exigir, a escala não muda.
+- Campo com bloco `enum`: coluna `VARCHAR` mais um `<constraints>`/changeSet de check com as chaves de `enum.valores`, nomeado `ck_[nometabelasemseparador]_[nomecamposemseparador]`. Incluir um valor novo no enum exige alterar o check em um changeSet próprio — o antigo já foi aplicado.
+- `email` e `link` não ganham check constraint de formato: a validação é da entidade e do formulário, não do banco.
 - `foto` e `arquivo`: coluna `fk_[nomecampo]` do tipo `UUID` com FK para `upload(uuid)` (tabela da lib APcore).
 - PK: `pk_[nome_tabela]`.
 - Unique: `un_[nometabelasemseparador]_[nomecamposemseparador]`.

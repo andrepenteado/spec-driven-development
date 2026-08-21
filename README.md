@@ -114,6 +114,11 @@ Use essa pasta para os YAMLs de entrada e para os manifestos gerados:
 .cruds/marca.generated.yaml
 ```
 
+Um YAML por tabela, sempre — inclusive quando a tela precisa se comportar de forma
+diferente conforme o perfil. Quem pode consultar, incluir, alterar e excluir vai em
+`tabela.acoes`; o que cada perfil vê em cada campo vai em `por-perfil`, dentro do
+próprio campo. As regras estão em `01-yaml-contrato.md`.
+
 ### 4. Alterar a spec
 
 Mudanças na spec podem ser detectadas durante o trabalho em um projeto consumidor. Como não existe
@@ -182,6 +187,8 @@ Execute o CRUD marca.
 As regras de precedência e o que a IA não pode fazer estão em `orquestrador.md` (fluxo e precedência) e em `00-contexto-geral.md` (regras globais e templates Angular). Para o desenvolvedor, o que importa saber:
 
 - A IA não sobrescreve CRUD já gerado e não altera arquivos fora do CRUD solicitado.
+- Configuração por perfil não gera mais de um CRUD: gera um só, com pesquisa e cadastro que se configuram conforme os perfis do usuário logado.
+- `tabela.acoes` é segurança de verdade (vira `@Secured` no service); `por-perfil` é apresentação.
 - YAMLs já executados devem ter o respectivo `.generated.yaml`; é ele que marca o CRUD como concluído.
 - Padrões reais do projeto consumidor prevalecem sobre os exemplos da spec, desde que não violem os critérios de aceite.
 
