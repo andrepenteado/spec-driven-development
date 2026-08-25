@@ -37,7 +37,7 @@ em `00-contexto-geral.md` e valem aqui sem repetição.
 - Enum: combo/select com os labels de `[NOME_ENUM]_LABELS` (`07-frontend-domain-service.md`), com uma primeira opção vazia identificando o campo.
 - FK: `ng-select` com `class="ng-select-bootstrap"` para receber o tema global Bootstrap-like do projeto. Vale mesmo quando o campo usa `fk-tipo: radio` no cadastro — `fk-tipo` não afeta o filtro.
 - `booleano`, `data`, `data-hora` e numéricos: controle compatível.
-- `moeda`: input com a mesma máscara do cadastro (`09-frontend-cadastro.md`), sem o `input-group` de `R$` — o filtro escondido é compacto e o `placeholder` já identifica o campo.
+- `moeda`: input com a mesma configuração do cadastro (`09-frontend-cadastro.md`, "Campo monetário" — máscara, `typeFromDecimals`, `leadZero` e `outputTransformFn`), sem o `input-group` de `R$`: o filtro escondido é compacto e o `placeholder` já identifica o campo. Filtrar com digitação diferente da do cadastro faria o usuário procurar um valor que ele nunca digitou daquele jeito.
 
 ## Grid
 

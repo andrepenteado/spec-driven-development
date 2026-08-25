@@ -722,8 +722,10 @@ escala fixa de 2 casas, tipo Java próprio e apresentação de moeda.
   e comparação.
 - Aceita `obrigatorio`, `unique`, `indice`, `exibe-titulo`, `edicao` e
   `pesquisavel: exato`. `pesquisavel: contem` é rejeitado — não é texto.
-- **Não** aceita `mask` nem `enum`: a máscara de moeda já vem do tipo
-  (`09-frontend-cadastro.md`). Declarar `mask` torna o YAML `invalido`.
+- **Não** aceita `mask` nem `enum`: a configuração do campo monetário já vem do tipo, e
+  não é só uma máscara — são quatro configurações do ngx-mask que, juntas, impedem que
+  `15050` seja lido como quinze mil e cinquenta (`09-frontend-cadastro.md`, "Campo
+  monetário"). Declarar `mask` torna o YAML `invalido`.
 - Aceita valor negativo: desconto, estorno e ajuste são parte do domínio.
 - Formatação pt-BR com símbolo em toda exibição — grid, tabela de lista e resumo do
   título: `R$ 1.234,56`, alinhado à direita.

@@ -57,13 +57,66 @@ conteúdo, em `nav nav-pills` com `nav-link rounded-pill px-3` e ícone por aba.
 - `booleano` usa checkbox/toggle.
 - `textoN` usa `<textarea>` com `rows="N"` (N = número no sufixo do tipo, ex.: `texto3` → 3 linhas) e ocupa a largura do `colunas-layout`. Textarea e campos longos ocupam `col-12`.
 - `editor` usa o componente do CKEditor 5 (ver "Campo de texto rico").
-- `moeda` usa `<input type="text">` em `input-group`, com `input-group-text` `R$` antes do campo, `class="form-control text-end"` e a máscara de moeda do ngx-mask: `mask="separator.2"`, `thousandSeparator="."` e `decimalMarker=","`. Não usar `type="number"`: ele ignora a máscara e mostra as setas de incremento, que não fazem sentido em dinheiro.
+- `moeda` usa `<input type="text">` em `input-group`, com `input-group-text` `R$` antes do campo, `class="form-control text-end"` e a configuração completa do campo monetário do ngx-mask (ver "Campo monetário"). Não usar `type="number"`: ele ignora a máscara e mostra as setas de incremento, que não fazem sentido em dinheiro.
 - `email` usa `<input type="email">` em `input-group` com `input-group-text` e ícone `fa-envelope`, mais `Validators.email` no `FormControl`.
 - `link` usa `<input type="url">` em `input-group` com `input-group-text` e ícone `fa-link`, mais um validador de URL absoluta (`http`/`https`) no `FormControl`, com `placeholder="https://"`.
 - Em `email` e `link`, a mensagem de formato é `[label] inválido`, em `invalid-feedback` própria, separada da mensagem de campo obrigatório: obrigatório e formato inválido são erros diferentes e o usuário precisa saber qual dos dois ocorreu.
 - `foto`: exibe miniatura (thumbnail) da imagem; clicar na miniatura abre o diálogo para incluir/editar. Usa `UploadService` de `@andre.penteado/ngx-apcore` e preview `data:[tipoMime];base64,[base64]`.
 - O campo `foto` deve ficar **sempre centralizado verticalmente** em relação aos demais campos da mesma linha: usar `align-items-center` na `row` e centralizar a miniatura na coluna (`d-flex flex-column align-items-center justify-content-center`), dando à linha um aspecto de portfólio.
 - `arquivo`: campo de upload simples (seletor de arquivo mostrando o nome), sem miniatura, também via `UploadService`.
+
+## Campo monetário (`moeda`)
+
+O controle de `moeda` (`01-yaml-contrato.md`) é a máscara **e mais três configurações**.
+Aplicar só `mask="separator.2"` produz um campo que parece certo e erra o valor.
+
+```html
+<div class="input-group">
+  <span class="input-group-text">R$</span>
+  <input id="valor" type="text" formControlName="valor" class="form-control text-end"
+         [mask]="mascaraMoeda" thousandSeparator="." decimalMarker=","
+         [typeFromDecimals]="true" [leadZero]="true"
+         [outputTransformFn]="saidaMoeda" placeholder="0,00">
+</div>
+```
+
+| Configuração | Por quê |
+|---|---|
+| `mask="separator.2"` | Agrupa o milhar e limita a duas casas decimais. |
+| `thousandSeparator="."` / `decimalMarker=","` | Convenção pt-BR: `1.234,56`. |
+| `[typeFromDecimals]="true"` | Os dígitos entram **pela direita**, como em caixa eletrônico: `15050` vira `150,50`. |
+| `[leadZero]="true"` | Completa as casas decimais: um valor gravado como `1234.5` aparece `1.234,50`, não `1.234,5`. |
+| `[outputTransformFn]="saidaMoeda"` | Devolve `number` ao `FormControl`, e `null` no campo vazio. |
+
+- **`typeFromDecimals` não é preferência de digitação, é correção.** Sem ele o separador
+  decimal precisa ser digitado, e quem digita `15050` esperando R$ 150,50 grava **quinze
+  mil e cinquenta reais**. Com ele, ponto e vírgula digitados são ignorados — o usuário
+  que trocar um pelo outro, por hábito ou por teclado numérico, digita o valor certo do
+  mesmo jeito.
+- **`outputTransformFn` é o que mantém o tipo do domínio.** `leadZero` faz o ngx-mask
+  entregar o valor desmascarado como texto (`'1234.56'`), e `07-frontend-domain-service.md`
+  declara `moeda` como `number`. Sem a conversão o `FormControl` guardaria string e a
+  entidade mentiria o próprio tipo. A função é declarada uma vez no componente, como
+  campo `readonly`, e não como arrow no template: `outputTransformFn` é input signal, e
+  uma arrow nova a cada ciclo de detecção seria uma troca de valor a cada ciclo.
+
+```ts
+export const MASCARA_MOEDA = "separator.2";
+
+// Campo vazio vira null, e nao 0: valor nao informado nao e valor zero.
+export function saidaMoeda(valor: string | number | undefined | null): unknown {
+  return valor === "" || valor === null || valor === undefined ? null : Number(valor);
+}
+```
+
+- O mesmo conjunto vale em **todo** campo `moeda` do projeto, inclusive nos
+  subformulários de `tipo: lista` e nos filtros da pesquisa (`08-frontend-pesquisar.md`).
+  Dois campos de dinheiro que se comportam diferente na mesma aplicação são um bug de
+  usabilidade, não uma escolha de tela.
+- Testar a **combinação**, não a constante: um spec que só verifica `mask="separator.2"`
+  passa com o campo errado. O teste digita caractere a caractere num host renderizado —
+  disparando `focus` antes, senão o ngx-mask engole a primeira tecla — e confere o valor
+  exibido e o valor que chega ao `FormControl`.
 
 ## Campo de texto rico (`editor`)
 
@@ -512,6 +565,7 @@ um botão. Sem `aba`, ele fica na barra de botões, à direita, antes de `Voltar
 - Campo `exibe-titulo: true` aparece como `label: valor` abaixo do título, com fonte de subtítulo, e some quando não há valor.
 - Campo `email` e `link` validam formato no cliente, com mensagem própria distinta da de obrigatório, e aparecem clicáveis no resumo do título.
 - Campo `moeda` usa máscara pt-BR com `R$` no `input-group`, alinhado à direita, e nunca `type="number"`.
+- Campo `moeda` tem `typeFromDecimals`, `leadZero` e `outputTransformFn` junto da máscara: digitar `15050` resulta em `150,50`, ponto e vírgula digitados são ignorados e o `FormControl` recebe `number` (`null` quando vazio).
 - Campo `editor` renderiza o CKEditor 5 ligado ao `FormControl`, ocupa `col-12`, e o bloqueio usa `enableReadOnlyMode`, nunca `disabled`.
 - FK com `fk-tipo: radio` renderiza switches mutuamente exclusivos e vem pré-selecionada ao editar.
 - Cada `tipo: lista` tem aba própria, tabela sem DataTables com Excluir na 1ª coluna, e o subformulário está fora do `FormGroup` principal e fora de um `<form>` aninhado.

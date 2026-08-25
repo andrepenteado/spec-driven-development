@@ -45,7 +45,7 @@ export const SITUACAO_PEDIDO_LABELS: Record<SituacaoPedido, string> = {
 - `id?: number`.
 - `fk`: tipo da entidade referenciada.
 - `textoN`, `editor`, `email` e `link`: tipo `string`.
-- `moeda`: tipo `number`, com duas casas decimais. O JSON trafega número, não string formatada — a formatação com `R$` é da tela.
+- `moeda`: tipo `number`, com duas casas decimais. O JSON trafega número, não string formatada — a formatação com `R$` é da tela. Quem garante o `number` na volta do formulário é o `outputTransformFn` do campo (`09-frontend-cadastro.md`, "Campo monetário"): a máscara sozinha entrega texto.
 - `foto`/`arquivo`: tipo `Upload` (de `@andre.penteado/ngx-apcore`).
 - `enum`: tipo do enum gerado.
 - `lista` com `persistencia: agregado`: `[NomeTabelaFilha][]`, com o nome do campo em camelCase.
