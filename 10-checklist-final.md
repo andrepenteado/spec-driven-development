@@ -39,6 +39,7 @@
 - Pesquisa criada seguindo template, estendendo `PesquisarBaseComponent`, com filtro resolvido no backend via `/pesquisar` e grid client-side.
 - Cadastro criado seguindo template, estendendo `CadastroBaseComponent`, com abas de `aba`, controles de `fk-tipo` e abas de lista.
 - YAML com `acoes` ou `por-perfil` gerou `[nome-tabela].perfis.ts` e reusou `src/app/config/perfis-crud.ts`; pesquisa e cadastro resolvem a configuração pelo `LoginService`.
+- Só as fatias que o YAML declara foram geradas (`acoes` ↔ `tabela.acoes`, `acoesCustomizadas` ↔ `tabela.acoes-customizadas`, `campos` ↔ `por-perfil`/`edicao`, `listas` ↔ `lista.acoes`); YAML sem nenhuma delas não gerou os arquivos e usa `hasRole` direto.
 - Botões `Novo`, `Excluir` e `Gravar`, ação da linha, abas de lista e ações customizadas respeitam as ações do perfil.
 - Todo `@Component` criado declara `changeDetection: ChangeDetectionStrategy.Eager`.
 - Operações de pesquisar, buscar, gravar e excluir logam com `console.info` (padrão em `11-monitoramento-faro.md`).

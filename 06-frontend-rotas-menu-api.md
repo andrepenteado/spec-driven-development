@@ -119,6 +119,32 @@ O CRUD tem duas telas (pesquisa e cadastro) que precisam da **mesma** configura�
 por isso ela fica ao lado das duas, no arquivo do CRUD, e não dentro de um dos
 componentes.
 
+### Gere só as fatias que o YAML declara
+
+A configuração tem quatro fatias independentes, e **cada uma só existe quando o YAML
+declara a coisa correspondente**:
+
+| Fatia | Só quando o YAML tem |
+|---|---|
+| `acoes` | `tabela.acoes` |
+| `acoesCustomizadas` | `tabela.acoes-customizadas` |
+| `campos` | algum campo com `por-perfil` ou `edicao` |
+| `listas` | algum `lista.acoes` |
+
+O gate é **por fatia, não por CRUD**: um YAML que declara só `lista.acoes` gera só
+`listas` — e o `perfis-crud.ts` daquele projeto só carrega o código dessa fatia.
+
+Não é preciosismo. Emitir a estrutura inteira porque *uma* das fatias existe produz um
+mapa de campos com os mesmos valores repetidos para todos os perfis, um mapa de ações
+todo `true` e um `acoesCustomizadas` vazio — dezenas de linhas por CRUD que nenhum
+template lê e que precisam ser mantidas em sincronia com o YAML na mão. O sintoma é
+sempre o mesmo: uma configuração de duzentas linhas cujo conteúdo real são dois
+booleanos.
+
+Quando nenhuma fatia existe, **não gere nenhum dos dois arquivos**: perfil vira
+`loginService.hasRole(...)` no componente que precisar, e a seção "Configuração por
+perfil" de `09-frontend-cadastro.md` não se aplica.
+
 ### `src/app/config/perfis-crud.ts`
 
 Criado uma única vez no projeto, no primeiro CRUD que precisar, e reaproveitado pelos
@@ -289,10 +315,11 @@ export const PERFIS_PEDIDO: PerfilCrud[] = [
 - Uma entrada por perfil de `projeto.perfis`, na ordem do YAML.
 - Chaves de `campos` e `listas` em **camelCase**, iguais aos nomes dos `FormControl` e
   aos atributos da entidade TypeScript — não ao `nome` snake_case do YAML.
-- `campos` traz **todos** os campos do CRUD para todos os perfis, com os valores já
-  resolvidos: propriedade comum do campo se repete igual em cada perfil, propriedade de
-  `por-perfil` entra com o valor daquele perfil. Nada fica como regra a interpretar
-  depois.
+- Quando a fatia `campos` existe, ela traz **todos** os campos do CRUD para todos os
+  perfis, com os valores já resolvidos: propriedade comum do campo se repete igual em
+  cada perfil, propriedade de `por-perfil` entra com o valor daquele perfil. Nada fica
+  como regra a interpretar depois. Sem `por-perfil` nem `edicao` no YAML a fatia não
+  existe — ver "Gere só as fatias que o YAML declara".
 - `listas` tem uma entrada por campo `tipo: lista`, e `acoesCustomizadas` uma por item
   de `tabela.acoes-customizadas`.
 
@@ -349,5 +376,7 @@ No template, `config.acoes` decide botões e `campo(...)` decide cada campo:
 - Menu respeita roles.
 - Services usam a constante de API.
 - Rotas e menu usam todos os perfis de `projeto.perfis`.
+- Cada fatia da configuração por perfil (`acoes`, `acoesCustomizadas`, `campos`,
+  `listas`) só foi gerada porque o YAML declara a coisa correspondente.
 - YAML com `acoes` ou `por-perfil` gerou um único `[nome-tabela].perfis.ts` e reusou o
   `perfis-crud.ts` do projeto; YAML sem nenhum dos dois não gerou nenhum dos arquivos.

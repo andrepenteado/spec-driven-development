@@ -70,6 +70,27 @@ conteúdo, em `nav nav-pills` com `nav-link rounded-pill px-3` e ícone por aba.
 O controle de `moeda` (`01-yaml-contrato.md`) é a máscara **e mais três configurações**.
 Aplicar só `mask="separator.2"` produz um campo que parece certo e erra o valor.
 
+Por isso ele **não é escrito à mão**: use o `apcore-campo-moeda` da ngx-apcore, que já
+traz a configuração inteira, o `input-group` com `R$` e o alinhamento à direita.
+
+```html
+<label class="form-label fw-semibold" for="valor">Valor</label>
+<apcore-campo-moeda inputId="valor" formControlName="valor"
+                    [somenteLeitura]="!podeEditar"></apcore-campo-moeda>
+```
+
+- Inputs: `inputId`, `somenteLeitura`, `obrigatorio`, `mensagemObrigatorio`,
+  `placeholder`, `rotuloAcessivel`. O label continua fora do componente, seguindo as
+  regras gerais de label desta página.
+- `somenteLeitura`, nunca `disabled`: controle desabilitado sai de `form.value` e o
+  campo chegaria vazio ao backend, apagando o valor gravado.
+- Requer `provideNgxMask()` nos providers da aplicação, e `ngx-mask` instalado — é
+  `peerDependency` **opcional** da ngx-apcore, necessária só para quem tem campo
+  monetário.
+
+O restante desta seção é o porquê de cada configuração, e vale para quem precisar
+reproduzir o campo fora da ngx-apcore:
+
 ```html
 <div class="input-group">
   <span class="input-group-text">R$</span>
@@ -112,7 +133,8 @@ export function saidaMoeda(valor: string | number | undefined | null): unknown {
 - O mesmo conjunto vale em **todo** campo `moeda` do projeto, inclusive nos
   subformulários de `tipo: lista` e nos filtros da pesquisa (`08-frontend-pesquisar.md`).
   Dois campos de dinheiro que se comportam diferente na mesma aplicação são um bug de
-  usabilidade, não uma escolha de tela.
+  usabilidade, não uma escolha de tela — e é exatamente o que o componente compartilhado
+  existe para impedir.
 - Testar a **combinação**, não a constante: um spec que só verifica `mask="separator.2"`
   passa com o campo errado. O teste digita caractere a caractere num host renderizado —
   disparando `focus` antes, senão o ngx-mask engole a primeira tecla — e confere o valor
@@ -565,7 +587,7 @@ um botão. Sem `aba`, ele fica na barra de botões, à direita, antes de `Voltar
 - Campo `exibe-titulo: true` aparece como `label: valor` abaixo do título, com fonte de subtítulo, e some quando não há valor.
 - Campo `email` e `link` validam formato no cliente, com mensagem própria distinta da de obrigatório, e aparecem clicáveis no resumo do título.
 - Campo `moeda` usa máscara pt-BR com `R$` no `input-group`, alinhado à direita, e nunca `type="number"`.
-- Campo `moeda` tem `typeFromDecimals`, `leadZero` e `outputTransformFn` junto da máscara: digitar `15050` resulta em `150,50`, ponto e vírgula digitados são ignorados e o `FormControl` recebe `number` (`null` quando vazio).
+- Campo `moeda` usa o `apcore-campo-moeda` da ngx-apcore, e não a máscara escrita à mão: digitar `15050` resulta em `150,50`, ponto e vírgula digitados são ignorados e o `FormControl` recebe `number` (`null` quando vazio).
 - Campo `editor` renderiza o CKEditor 5 ligado ao `FormControl`, ocupa `col-12`, e o bloqueio usa `enableReadOnlyMode`, nunca `disabled`.
 - FK com `fk-tipo: radio` renderiza switches mutuamente exclusivos e vem pré-selecionada ao editar.
 - Cada `tipo: lista` tem aba própria, tabela sem DataTables com Excluir na 1ª coluna, e o subformulário está fora do `FormGroup` principal e fora de um `<form>` aninhado.
