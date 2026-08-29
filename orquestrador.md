@@ -34,8 +34,8 @@ apenas o padrão de logs de `11-monitoramento-faro.md`.
 2. Validar cada YAML conforme `01-yaml-contrato.md`.
 3. Inspecionar o projeto real e identificar padrões existentes.
 4. Apresentar relatório com status: `novo`, `existente`, `conflito` ou `invalido`, listando os perfis e as ações de cada CRUD.
-5. Perguntar explicitamente quais CRUDs novos executar.
-6. Alterar código somente após confirmação do usuário.
+5. Executar a geração na sequência, sem pedir confirmação e sem aguardar aprovação: todo CRUD com status `novo` é implementado no mesmo comando que disparou a leitura. O relatório do item 4 é informativo, não é um ponto de parada.
+6. Gerar apenas os CRUDs `novo`. CRUDs `existente`, `conflito` ou `invalido` não são gerados nem alterados: apenas relatados com o motivo. Se o usuário nomeou CRUDs específicos no pedido, gerar somente esses.
 7. Gerar backend, depois frontend.
 8. Criar `.cruds/[nome-crud].generated.yaml` apenas após sucesso.
 9. Informar arquivos criados/alterados, validações executadas, campos `obrigatorio: true` ocultos para algum perfil que possa incluir e **o que foi implementado a partir do `prompt` de cada `regra` e de cada ação customizada**.

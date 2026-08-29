@@ -11,7 +11,7 @@
 - Validar a exaustividade do `por-perfil`: propriedade que aparece nele está declarada para todos os perfis de `projeto.perfis` e não tem valor comum no campo.
 - Validar que `colunas-layout` não aparece em `por-perfil`: largura é igual para todos os perfis; o que varia é `exibe-formulario`.
 - Confirmar padrões reais do backend/frontend.
-- Perguntar quais CRUDs executar.
+- Gerar todo CRUD `novo` na sequência, sem pedir confirmação: a validação é etapa da execução, não um ponto de parada.
 
 ## Backend
 

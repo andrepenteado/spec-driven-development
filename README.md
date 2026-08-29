@@ -8,7 +8,7 @@ A ideia é concentrar aqui as regras comuns de arquitetura, stack, nomenclatura,
 
 Este projeto é baseado no conceito de **Spec-Driven Development (SDD)**.
 
-No SDD, a implementação não parte apenas de prompts soltos ou decisões implícitas da IA. Antes de gerar ou alterar código, a IA deve ler uma especificação versionada, entender as regras do projeto, validar as entradas, reportar o que pretende fazer e só então executar a mudança confirmada pelo desenvolvedor.
+No SDD, a implementação não parte apenas de prompts soltos ou decisões implícitas da IA. Antes de gerar ou alterar código, a IA deve ler uma especificação versionada, entender as regras do projeto e validar as entradas. Validadas as entradas, a IA implementa direto, no mesmo comando: o relatório do que foi feito vem junto com o código gerado, não como pedido de aprovação prévia.
 
 Neste repositório, a spec funciona como uma camada de contrato entre:
 
@@ -45,7 +45,7 @@ Essas tecnologias devem ser tratadas como padrão da documentação atual. Se um
 
 ## Estrutura
 
-- `orquestrador.md`: ponto de entrada para a IA. Define ordem de leitura, validação, confirmação e geração.
+- `orquestrador.md`: ponto de entrada para a IA. Define ordem de leitura, validação e geração.
 - `00-contexto-geral.md`: regras globais, stack, escopo, auditoria e critérios gerais.
 - `01-yaml-contrato.md`: contrato esperado para os YAMLs de CRUD.
 - `02-backend-liquibase.md`: regras para changelogs e banco de dados.
@@ -153,10 +153,9 @@ negócio do consumidor e documentação própria do produto não entram aqui.
 
 1. Adicione a pasta do clone deste repositório ao contexto da IA.
 2. Crie os YAMLs de CRUD em `.cruds/[nome-crud].yaml`, conforme `01-yaml-contrato.md`.
-3. Peça para a IA ler e seguir `orquestrador.md`.
-4. Confirme explicitamente quais CRUDs executar, depois do relatório de validação.
+3. Peça para a IA ler e seguir `orquestrador.md`. A IA valida e já implementa os CRUDs novos no mesmo comando.
 
-O fluxo que a IA segue a partir daí — ordem de leitura das specs, validação, relatório de status, geração e manifesto — está definido em `orquestrador.md` e não é repetido aqui.
+O fluxo que a IA segue a partir daí — ordem de leitura das specs, validação, geração e manifesto — está definido em `orquestrador.md` e não é repetido aqui. Para gerar só um CRUD específico, nomeie o YAML no pedido.
 
 ## Prompt recomendado
 
@@ -165,7 +164,7 @@ Para executar a leitura geral dos CRUDs pendentes:
 ```text
 Leia e siga orquestrador.md como instrução principal para gerar CRUDs.
 Os YAMLs de entrada estão em .cruds/.
-Valide, reporte status e aguarde confirmação antes de alterar código.
+Valide e implemente os CRUDs novos, reportando o que foi gerado ao final.
 ```
 
 Para um YAML específico:
@@ -173,14 +172,10 @@ Para um YAML específico:
 ```text
 Leia e siga orquestrador.md.
 Use o YAML .cruds/marca.yaml.
-Valide primeiro, apresente o status e aguarde confirmação antes de criar arquivos.
+Valide e implemente o CRUD, reportando o que foi gerado ao final.
 ```
 
-Depois do relatório da IA, confirme explicitamente:
-
-```text
-Execute o CRUD marca.
-```
+Não há etapa de confirmação: a IA gera o código na mesma execução do prompt.
 
 ## Regras importantes
 
