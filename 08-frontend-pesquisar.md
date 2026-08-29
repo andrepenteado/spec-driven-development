@@ -47,6 +47,13 @@ em `00-contexto-geral.md` e valem aqui sem repetição.
 - Coluna principal usa `record-cell`, `record-main` e `record-sub`; ID nunca entra em main/sub.
 - Coluna principal deve incluir um ícone FontAwesome à esquerda, coerente com a entidade ou com fallback `fa-tag`.
 - Ações usam `action-stack`, editar `fa-pen-to-square`, excluir `fa-trash-can`.
+- Botões da coluna `Ações` são **redondos**, só com utilitários do Bootstrap, sem CSS
+  customizado: `btn btn-outline-[cor] btn-sm rounded-circle p-2 lh-1`. O `p-2` com `lh-1`
+  deixa o padding igual nos quatro lados e o `rounded-circle` fecha o círculo; sem eles o
+  botão fica retangular, porque o padding horizontal padrão do `.btn` é maior que o
+  vertical. Os ícones levam `fa-fw`, para que todos os botões da linha tenham a mesma
+  largura independentemente do glifo. Vale para editar/visualizar, excluir e ações
+  customizadas.
 - Com `por-perfil`, envolver `<th>` e `<td>` de cada coluna opcional no mesmo
   `@if (campo('nomeDoCampo').exibeGrid)`. Os dois precisam usar exatamente a mesma
   condição, ou o DataTables recebe cabeçalho e corpo com contagens diferentes de
@@ -117,7 +124,7 @@ um botão no `action-stack` da linha, depois de editar e excluir. A propriedade 
 ação não vale aqui — ela posiciona o botão no cadastro, e a pesquisa não tem abas:
 
 - `@if (config.acoesCustomizadas['revogar'])` no botão, com o `icone` e o `label` da
-  ação em `title`/`aria-label`. Botão icon-only, como os demais da linha.
+  ação em `title`/`aria-label`. Botão icon-only e redondo, como os demais da linha.
 - `confirmar: true` (default): `exibirMensagem.showConfirm(...)` antes de chamar o
   service, com a mensagem `Confirma [label] [de/do/da] [entidade] [identificação]`.
 - No sucesso, toastr de sucesso e `this.pesquisar()` (herdado) para recarregar só a
