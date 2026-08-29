@@ -91,7 +91,7 @@
                 </div>
                 <div class="col-12 col-lg-5">
                   <label class="form-label fw-semibold required-label">CPF <i class="fa-solid fa-circle-exclamation help-dot" title="Campo obrigatório"></i></label>
-                  <div class="input-group"><span class="input-group-text"><i class="fa-solid fa-address-card"></i></span><input class="form-control" value="123.456.789-00"></div>
+                  <div class="input-group"><span class="input-group-text"><i class="fa-solid fa-address-card"></i></span><input class="form-control" inputmode="numeric" value="123.456.789-00"></div>
                 </div>
                 <div class="col-12 col-md-6">
                   <label class="form-label fw-semibold required-label">Empresa <i class="fa-solid fa-circle-exclamation help-dot" title="Campo obrigatório"></i></label>
@@ -103,7 +103,7 @@
                 </div>
                 <div class="col-12 col-md-5">
                   <label class="form-label fw-semibold required-label">Telefone <i class="fa-solid fa-circle-exclamation help-dot" title="Campo obrigatório"></i></label>
-                  <input class="form-control" value="(11) 98888-1200">
+                  <input class="form-control" inputmode="numeric" value="(11) 98888-1200">
                 </div>
                 <div class="col-12 col-md-7">
                   <label class="form-label fw-semibold">E-mail</label>
@@ -143,7 +143,7 @@
               <div class="row g-3">
                 <div class="col-12 col-md-4">
                   <label class="form-label fw-semibold">CEP</label>
-                  <div class="input-group"><span class="input-group-text"><i class="fa-solid fa-magnifying-glass"></i></span><input class="form-control" value="01001-000"><button class="btn btn-outline-primary" type="button">Buscar</button></div>
+                  <div class="input-group"><span class="input-group-text"><i class="fa-solid fa-magnifying-glass"></i></span><input class="form-control" inputmode="numeric" value="01001-000"><button class="btn btn-outline-primary" type="button">Buscar</button></div>
                 </div>
                 <div class="col-12 col-md-8">
                   <label class="form-label fw-semibold">Logradouro</label>
@@ -151,7 +151,7 @@
                 </div>
                 <div class="col-12 col-md-3">
                   <label class="form-label fw-semibold">Número</label>
-                  <input class="form-control" value="120">
+                  <input class="form-control" inputmode="numeric" value="120">
                 </div>
                 <div class="col-12 col-md-5">
                   <label class="form-label fw-semibold">Complemento</label>
@@ -188,7 +188,7 @@
                 </div>
                 <div class="col-12 col-md-6">
                   <label class="form-label fw-semibold">Telefone de emergência</label>
-                  <input class="form-control" value="(11) 95555-3300">
+                  <input class="form-control" inputmode="numeric" value="(11) 95555-3300">
                 </div>
                 <div class="col-12 col-md-6">
                   <label class="form-label fw-semibold">E-mail alternativo</label>
@@ -196,7 +196,7 @@
                 </div>
                 <div class="col-12 col-md-6">
                   <label class="form-label fw-semibold">Ramal interno</label>
-                  <input class="form-control" value="204">
+                  <input class="form-control" inputmode="numeric" value="204">
                 </div>
                 <div class="col-12">
                   <label class="form-label fw-semibold">Observações de contato</label>
@@ -227,7 +227,11 @@
                 </div>
                 <div class="col-12 col-md-3">
                   <label class="form-label fw-semibold">Nascimento</label>
-                  <input class="form-control" type="date">
+                  <!-- apcore-campo-data: dd/mm/aaaa digitado, teclado numerico no celular -->
+                  <div class="input-group">
+                    <span class="input-group-text"><i class="fa-solid fa-calendar-day"></i></span>
+                    <input class="form-control" type="text" inputmode="numeric" placeholder="dd/mm/aaaa" autocomplete="bday">
+                  </div>
                 </div>
               </div>
 

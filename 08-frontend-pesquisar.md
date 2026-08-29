@@ -36,8 +36,9 @@ em `00-contexto-geral.md` e valem aqui sem repetição.
 - Texto (`texto`, `textoN`, `editor`, `email`, `link`): input texto. Em `email` e `link` o filtro é texto comum, sem `type="email"`/`type="url"` — o usuário filtra por trecho, não digita um endereço completo. Em `editor`, a busca é sobre o HTML armazenado (`01-yaml-contrato.md`).
 - Enum: combo/select com os labels de `[NOME_ENUM]_LABELS` (`07-frontend-domain-service.md`), com uma primeira opção vazia identificando o campo.
 - FK: `ng-select` com `class="ng-select-bootstrap"` para receber o tema global Bootstrap-like do projeto. Vale mesmo quando o campo usa `fk-tipo: radio` no cadastro — `fk-tipo` não afeta o filtro.
-- `booleano`, `data`, `data-hora` e numéricos: controle compatível.
-- `moeda`: input com a mesma configuração do cadastro (`09-frontend-cadastro.md`, "Campo monetário" — máscara, `typeFromDecimals`, `leadZero` e `outputTransformFn`), sem o `input-group` de `R$`: o filtro escondido é compacto e o `placeholder` já identifica o campo. Filtrar com digitação diferente da do cadastro faria o usuário procurar um valor que ele nunca digitou daquele jeito.
+- `booleano` e numéricos: controle compatível. Filtro numérico segue a regra de teclado do cadastro (`09-frontend-cadastro.md`, "Teclado numérico no celular"): `inputmode` declarado, `numeric` por padrão.
+- `data` e `data-hora`: `apcore-campo-data` da ngx-apcore (`09-frontend-cadastro.md`, "Campo de data"), nunca `type="date"` — pelo mesmo motivo do cadastro, e para a data se digitar do mesmo jeito nas duas telas. Sem `<label>`, identificado por `rotuloAcessivel` e `titulo`; o `icone` fica de fora, que o filtro escondido é compacto.
+- `moeda`: `apcore-campo-moeda` da ngx-apcore, a mesma configuração do cadastro (`09-frontend-cadastro.md`, "Campo monetário" — máscara, `typeFromDecimals`, `leadZero`, `outputTransformFn` e `inputmode`). Filtrar com digitação diferente da do cadastro faria o usuário procurar um valor que ele nunca digitou daquele jeito, e é por isso que aqui o filtro abre exceção à regra de compactação e mantém o `input-group` de `R$` que o componente traz.
 
 ## Grid
 
@@ -166,6 +167,7 @@ ação não vale aqui — ela posiciona o botão no cadastro, e a pesquisa não 
 - `Novo` e `Excluir` só aparecem para quem tem a ação; sem `alterar`, a ação da linha é `Visualizar` com `fa-eye`.
 - Ação customizada com `tela` incluindo `pesquisa` aparece na linha, confirma antes e recarrega a lista no sucesso.
 - Campos e botões dos filtros permanecem na mesma linha em telas médias e grandes, e os botões exibem somente ícones, com acessibilidade por `title` e `aria-label`.
+- Filtro de `data` usa `apcore-campo-data` e filtro de `moeda` usa `apcore-campo-moeda`, os mesmos componentes do cadastro; nenhum filtro só de dígitos abre o teclado alfabético no celular.
 - A tela estende `PesquisarBaseComponent`.
 - Pesquisar chama `/pesquisar` no backend; não há filtro em memória sobre `this.lista` nem DataTables server-side.
 - Grid respeita ordem fixa das colunas e a coluna principal exibe ícone à esquerda, título e subtítulo.

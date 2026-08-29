@@ -58,6 +58,8 @@ conteúdo, em `nav nav-pills` com `nav-link rounded-pill px-3` e ícone por aba.
 - `textoN` usa `<textarea>` com `rows="N"` (N = número no sufixo do tipo, ex.: `texto3` → 3 linhas) e ocupa a largura do `colunas-layout`. Textarea e campos longos ocupam `col-12`.
 - `editor` usa o componente do CKEditor 5 (ver "Campo de texto rico").
 - `moeda` usa `<input type="text">` em `input-group`, com `input-group-text` `R$` antes do campo, `class="form-control text-end"` e a configuração completa do campo monetário do ngx-mask (ver "Campo monetário"). Não usar `type="number"`: ele ignora a máscara e mostra as setas de incremento, que não fazem sentido em dinheiro.
+- `data` usa o `apcore-campo-data` da ngx-apcore (ver "Campo de data"). Não usar `type="date"`: no celular ele abre o seletor de calendário e não deixa digitar nada, e chegar a um ano de nascimento rolando mês a mês é penoso.
+- Todo campo que recebe só dígitos declara `inputmode` (ver "Teclado numérico no celular"). É um atributo por campo, e é o que separa digitar um CPF no celular de brigar com o teclado alfabético.
 - `email` usa `<input type="email">` em `input-group` com `input-group-text` e ícone `fa-envelope`, mais `Validators.email` no `FormControl`.
 - `link` usa `<input type="url">` em `input-group` com `input-group-text` e ícone `fa-link`, mais um validador de URL absoluta (`http`/`https`) no `FormControl`, com `placeholder="https://"`.
 - Em `email` e `link`, a mensagem de formato é `[label] inválido`, em `invalid-feedback` própria, separada da mensagem de campo obrigatório: obrigatório e formato inválido são erros diferentes e o usuário precisa saber qual dos dois ocorreu.
@@ -67,7 +69,7 @@ conteúdo, em `nav nav-pills` com `nav-link rounded-pill px-3` e ícone por aba.
 
 ## Campo monetário (`moeda`)
 
-O controle de `moeda` (`01-yaml-contrato.md`) é a máscara **e mais três configurações**.
+O controle de `moeda` (`01-yaml-contrato.md`) é a máscara **e mais quatro configurações**.
 Aplicar só `mask="separator.2"` produz um campo que parece certo e erra o valor.
 
 Por isso ele **não é escrito à mão**: use o `apcore-campo-moeda` da ngx-apcore, que já
@@ -95,6 +97,7 @@ reproduzir o campo fora da ngx-apcore:
 <div class="input-group">
   <span class="input-group-text">R$</span>
   <input id="valor" type="text" formControlName="valor" class="form-control text-end"
+         inputmode="numeric"
          [mask]="mascaraMoeda" thousandSeparator="." decimalMarker=","
          [typeFromDecimals]="true" [leadZero]="true"
          [outputTransformFn]="saidaMoeda" placeholder="0,00">
@@ -108,12 +111,17 @@ reproduzir o campo fora da ngx-apcore:
 | `[typeFromDecimals]="true"` | Os dígitos entram **pela direita**, como em caixa eletrônico: `15050` vira `150,50`. |
 | `[leadZero]="true"` | Completa as casas decimais: um valor gravado como `1234.5` aparece `1.234,50`, não `1.234,5`. |
 | `[outputTransformFn]="saidaMoeda"` | Devolve `number` ao `FormControl`, e `null` no campo vazio. |
+| `inputmode="numeric"` | O campo é `type="text"`, e sem isto o celular abre o teclado alfabético para digitar dinheiro. |
 
 - **`typeFromDecimals` não é preferência de digitação, é correção.** Sem ele o separador
   decimal precisa ser digitado, e quem digita `15050` esperando R$ 150,50 grava **quinze
   mil e cinquenta reais**. Com ele, ponto e vírgula digitados são ignorados — o usuário
   que trocar um pelo outro, por hábito ou por teclado numérico, digita o valor certo do
   mesmo jeito.
+- **`inputmode` é `numeric`, não `decimal`.** Com `typeFromDecimals` os dígitos entram
+  pela direita e o separador decimal é ignorado, então uma tecla de vírgula no teclado do
+  celular só teria como enganar: quem a apertasse esperaria mudar as casas decimais e não
+  mudaria nada.
 - **`outputTransformFn` é o que mantém o tipo do domínio.** `leadZero` faz o ngx-mask
   entregar o valor desmascarado como texto (`'1234.56'`), e `07-frontend-domain-service.md`
   declara `moeda` como `number`. Sem a conversão o `FormControl` guardaria string e a
@@ -139,6 +147,74 @@ export function saidaMoeda(valor: string | number | undefined | null): unknown {
   passa com o campo errado. O teste digita caractere a caractere num host renderizado —
   disparando `focus` antes, senão o ngx-mask engole a primeira tecla — e confere o valor
   exibido e o valor que chega ao `FormControl`.
+
+## Campo de data (`data`)
+
+`type="date"` parece a escolha óbvia para `data` (`01-yaml-contrato.md`) e não é: no
+celular ele abre o seletor de calendário e **não deixa digitar nada**, e chegar a um ano
+de nascimento rolando mês a mês é penoso. Com `type="text"` mais `inputmode="numeric"` o
+teclado numérico aparece e a data é digitada direto.
+
+Trocar o `type` sozinho, porém, perde o que o campo nativo dava de graça — o formato, o
+valor em ISO e a recusa de 30 de fevereiro. Por isso o campo **não é escrito à mão**: use
+o `apcore-campo-data` da ngx-apcore.
+
+```html
+<label class="form-label fw-semibold" for="dataNascimento">Nascimento</label>
+<apcore-campo-data inputId="dataNascimento" formControlName="dataNascimento"
+                   icone="fa-solid fa-calendar-day"
+                   autocomplete="bday"></apcore-campo-data>
+```
+
+- Inputs: `inputId`, `icone`, `somenteLeitura`, `obrigatorio`, `mensagemObrigatorio`,
+  `autocomplete`, `placeholder`, `rotuloAcessivel`, `titulo`. Saída `alterado`, que é o
+  `change` de um input nativo. O label continua fora do componente.
+- **Por fora o campo fala ISO** (`aaaa-mm-dd`), igual ao `type="date"` que substitui: é o
+  formato que o backend recebe num `LocalDate` e o que a tela compara e ordena como
+  texto. A troca é transparente para o service e para o DTO — só o que o usuário vê muda.
+- Na tela o formato é `dd/mm/aaaa`, com as barras postas pela máscara e
+  `placeholder="dd/mm/aaaa"` para o formato ficar visível antes de digitar.
+- **Vale preencher o `autocomplete`**: `bday` faz o navegador oferecer a data de
+  nascimento que ele já guarda, e é o que evita a digitação inteira no celular.
+- `somenteLeitura`, nunca `disabled`, pelo mesmo motivo do campo monetário.
+- A validação é do componente e reprova mais que a contagem de dígitos: data incompleta,
+  `32/13/2026`, `30/02/2026` e `29/02` de ano não bissexto. O erro entra no formulário
+  como `data` e o `invalid-feedback` do próprio campo explica o que houve.
+- Como o validador é do Angular e não da validação nativa do HTML, o visual de campo
+  inválido depende de a aplicação espelhar `.ng-invalid` no `was-validated`, como já faz
+  com as demais máscaras.
+- O `ng-content` sai dentro do `input-group`, para o campo dividir o grupo com outro
+  controle quando os dois são a mesma informação — a data e o horário de um atendimento,
+  por exemplo.
+- Requer `provideNgxMask()` nos providers, e `ngx-mask` instalado — a mesma
+  `peerDependency` opcional do campo monetário.
+- O mesmo componente vale nos subformulários de `tipo: lista` e nos filtros da pesquisa
+  (`08-frontend-pesquisar.md`): duas telas do mesmo sistema em que a data se digita de
+  jeitos diferentes são um bug de usabilidade.
+
+## Teclado numérico no celular
+
+O teclado que o celular abre é decidido pelo `inputmode`, e o padrão é o alfabético.
+Um CPF, um CEP ou um telefone com máscara são `type="text"` — sem `inputmode` o usuário
+recebe as letras e precisa trocar de teclado antes de cada campo.
+
+**Regra: todo campo cujo conteúdo é só dígitos declara `inputmode`.** Vale para os campos
+com `mask` numérica do ngx-mask (`00.000.000/0000-00`, `000.000.000-00`, `00000-000`,
+`(00) 00000-0000`) e também para `type="number"`, que sozinho já abre o teclado numérico
+na maioria dos navegadores, mas não em todos.
+
+| Conteúdo | `inputmode` |
+|---|---|
+| Só dígitos: `inteiro`, `longo`, máscaras de CPF/CNPJ/CEP/telefone, data, moeda | `numeric` |
+| Aceita casas decimais digitadas: `decimal`, quantidades fracionárias | `decimal` |
+
+- `numeric` é o padrão; `decimal` só quando o usuário **precisa digitar** o separador
+  decimal. Oferecer a tecla de vírgula num campo que a ignora é um convite a errar.
+- `data` e `moeda` não precisam do atributo escrito na tela: `apcore-campo-data` e
+  `apcore-campo-moeda` já o declaram por dentro. É mais um motivo para não reescrever
+  esses campos à mão.
+- Não usar `type="tel"` para conseguir o teclado: ele traz `*`, `#` e `+`, que não fazem
+  parte de um CPF nem de um CEP, e muda a semântica do campo para o leitor de tela.
 
 ## Campo de texto rico (`editor`)
 
@@ -588,6 +664,8 @@ um botão. Sem `aba`, ele fica na barra de botões, à direita, antes de `Voltar
 - Campo `email` e `link` validam formato no cliente, com mensagem própria distinta da de obrigatório, e aparecem clicáveis no resumo do título.
 - Campo `moeda` usa máscara pt-BR com `R$` no `input-group`, alinhado à direita, e nunca `type="number"`.
 - Campo `moeda` usa o `apcore-campo-moeda` da ngx-apcore, e não a máscara escrita à mão: digitar `15050` resulta em `150,50`, ponto e vírgula digitados são ignorados e o `FormControl` recebe `number` (`null` quando vazio).
+- Campo `data` usa o `apcore-campo-data` da ngx-apcore e nunca `type="date"`: digita-se `dd/mm/aaaa` pelo teclado numérico, o `FormControl` guarda ISO (`aaaa-mm-dd`) e `30/02` é reprovado.
+- Todo campo só de dígitos declara `inputmode` — `numeric`, ou `decimal` quando o separador decimal é digitado. Nenhum campo com máscara numérica abre o teclado alfabético no celular.
 - Campo `editor` renderiza o CKEditor 5 ligado ao `FormControl`, ocupa `col-12`, e o bloqueio usa `enableReadOnlyMode`, nunca `disabled`.
 - FK com `fk-tipo: radio` renderiza switches mutuamente exclusivos e vem pré-selecionada ao editar.
 - Cada `tipo: lista` tem aba própria, tabela sem DataTables com Excluir na 1ª coluna, e o subformulário está fora do `FormGroup` principal e fora de um `<form>` aninhado.
