@@ -31,11 +31,11 @@ Definir regras globais para geração de CRUD.
 
 Regras válidas para toda tela gerada; as specs 08 e 09 não as repetem.
 
-- Omitir `<html>`, `<head>`, `<body>`, CDNs e scripts: os arquivos em `templates` são referência visual executável, não código a copiar literalmente.
+- Omitir `<html>`, `<head>`, `<body>`, CDNs e scripts: os arquivos em `templates/`, na pasta da spec, são referência visual executável, não código a copiar literalmente.
 - Usar sintaxe moderna de blocos (`@if`, `@for`, `@switch`) em vez das diretivas estruturais antigas (`*ngIf`, `*ngFor`, `*ngSwitch`).
 - Preferir classes utilitárias e componentes do Bootstrap 5 para decoração e layout.
 - Usar CSS customizado somente quando Bootstrap 5 não atender de forma simples.
-- CSS compartilhado criado para CRUDs deve ficar no CSS global do projeto (`frontend/src/styles.css`), nunca referenciar ou importar CSS de `templates/assets` no código gerado.
+- CSS compartilhado criado para CRUDs deve ficar no CSS global do projeto (`frontend/src/styles.css`), nunca referenciar ou importar CSS de `templates/assets` no código gerado: essa pasta é da spec, que não é copiada para o projeto consumidor, e o caminho não existiria em tempo de build.
 - Estilos globais do projeto (`frontend/src/styles.css`) devem ser carregados depois dos CSS de bibliotecas no `angular.json`, para sobrescrever ajustes visuais de Bootstrap, DataTables e ng-select quando necessário.
 
 ## Componentes Angular

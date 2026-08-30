@@ -2,7 +2,7 @@
 
 ## Validação antes de gerar
 
-- Escanear `.cruds/*.yaml`, ignorando `*.generated.yaml`.
+- Escanear `.cruds/*.yaml` na raiz do projeto consumidor, ignorando `*.generated.yaml`.
 - Classificar cada YAML como `novo`, `existente`, `conflito` ou `invalido`.
 - Validar metadados obrigatórios, nomes, tipos, FKs, `fk-tipo`, enums, `aba`, blocos `lista`, pesquisa, layout e `projeto.perfis`.
 - Validar que `tabela.campos` e cada `lista.campos` têm ao menos um `exibe-grid: true` — o default é `false`.
@@ -70,7 +70,7 @@
 
 ## Manifesto
 
-Criar `.cruds/[nome-crud].generated.yaml` após sucesso, com checksum normalizado, data/hora, status, perfis e arquivos gerados.
+Criar `.cruds/[nome-crud].generated.yaml` no projeto consumidor após sucesso, com checksum normalizado, data/hora, status, perfis e arquivos gerados.
 
 ## Relatório final
 

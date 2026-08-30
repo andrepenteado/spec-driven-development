@@ -6,6 +6,28 @@ Use este arquivo como ponto de entrada. Leia as specs na ordem indicada antes de
 
 Criar CRUDs novos a partir de YAMLs em `.cruds/*.yaml`, usando Java 25, Spring Boot 4, PostgreSQL, Liquibase, QueryDSL e Angular 22.
 
+## Onde a spec e o projeto vivem
+
+A spec **não** é copiada para dentro do projeto consumidor, nem como cópia manual, nem
+como subtree, nem como submódulo git. Ela é um clone próprio, adicionado ao contexto da
+sessão (`/add-dir`). Existem, portanto, **duas raízes distintas** durante a geração:
+
+- **Pasta da spec** (somente leitura): `orquestrador.md`, os `.md` numerados e
+  `templates/`. Todo caminho citado nas specs que termine em `.md` ou comece por
+  `templates/` é relativo a ela.
+- **Raiz do projeto consumidor** (diretório de trabalho da sessão): `.cruds/`, código de
+  backend e frontend, changelogs Liquibase, `frontend/src/styles.css`. Todo caminho de
+  entrada ou de saída da geração é relativo a ela.
+
+Regras:
+
+- `.cruds/*.yaml` fica na raiz do projeto consumidor. Se não houver `.cruds/` lá, relatar
+  isso e parar — não procurar YAML dentro da pasta da spec.
+- Nada é criado ou alterado dentro da pasta da spec durante a geração de CRUD, inclusive
+  `.generated.yaml`, que é gravado em `.cruds/` do consumidor.
+- Alterar a spec só quando o pedido for explicitamente sobre ela. A mudança é commitada no
+  repositório da spec, nunca copiada para o projeto consumidor.
+
 ## Ordem de leitura obrigatória
 
 1. `00-contexto-geral.md`
@@ -42,9 +64,9 @@ apenas o padrão de logs de `11-monitoramento-faro.md`.
 
 ## Regras de precedência
 
-- Specs desta pasta prevalecem sobre inferências genéricas da IA.
+- As specs da pasta adicionada ao contexto prevalecem sobre inferências genéricas da IA.
 - Padrões reais do projeto prevalecem sobre exemplos, desde que não violem critérios de aceite.
-- Templates em `templates` são referência visual executável, não código a copiar: as regras de template Angular estão em `00-contexto-geral.md`.
+- Templates em `templates/`, na pasta da spec, são referência visual executável, não código a copiar: as regras de template Angular estão em `00-contexto-geral.md`.
 - Se houver conflito entre specs, pare e relate o conflito.
 
 ## Critérios de aceite

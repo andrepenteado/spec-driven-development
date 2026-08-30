@@ -98,6 +98,11 @@ Code:
 A partir daí a IA lê `orquestrador.md` e os demais arquivos direto da spec, sem que exista qualquer
 cópia dentro do projeto consumidor.
 
+Como spec e projeto ficam em pastas diferentes, os caminhos citados dentro das specs seguem duas
+raízes: arquivos `.md` e `templates/` são da pasta da spec; `.cruds/`, código gerado, changelogs e
+`frontend/src/styles.css` são do projeto consumidor. Durante a geração a spec é só lida — nada é
+escrito nela, nem o `.generated.yaml`. Essa separação está formalizada em `orquestrador.md`.
+
 ### 3. Criar a pasta operacional de CRUDs
 
 Os YAMLs de CRUD são dados do projeto consumidor, não da spec compartilhada, e ficam no repositório

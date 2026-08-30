@@ -6,7 +6,8 @@ Definir entrada de metadados para criação do CRUD.
 
 ## Local
 
-YAMLs de entrada ficam em `.cruds/*.yaml`.
+YAMLs de entrada ficam em `.cruds/*.yaml`, na raiz do projeto consumidor — nunca dentro da
+pasta da spec, que é lida e não escrita.
 
 ## Exemplo
 
