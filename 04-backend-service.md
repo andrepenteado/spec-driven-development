@@ -143,8 +143,9 @@ public Edital revogar(Long id) {
 }
 ```
 
-- Assinatura fixa: recebe o `Long id` e devolve a entidade atualizada, para o frontend
-  não precisar de um `GET` a seguir.
+- Assinatura: recebe o `Long id` e devolve a entidade atualizada, para o frontend não
+  precisar de um `GET` a seguir. Com `corpo: true` (`01-yaml-contrato.md`), recebe também
+  a entidade, **antes** do id: `assinar(Edital edital, Long id)`.
 - `@Secured` com os `perfis` da ação, não com os do CRUD inteiro.
 - **Validar as pré-condições antes de alterar** e recusar com a exception de negócio do
   projeto (a que o handler converte em 409/422), nunca alterar em silêncio. O `prompt`
@@ -152,13 +153,51 @@ public Edital revogar(Long id) {
 - **Preencher a auditoria de alteração**: a ação muda o registro, então `alteradoPor` e
   `alteradoEm` são obrigatórios, como em `alterar`.
 - Não repetir a lógica de `alterar`: a ação mexe só no que o `prompt` manda.
-- `edicao` não se aplica aqui. Uma ação customizada é uma operação de negócio inteira,
-  autorizada pelos `perfis` dela; ela pode gravar campos que ninguém edita pela tela —
-  é exatamente assim que `edicao: []` em `situacao` convive com um `revogar` que a
-  altera.
+- `edicao` não se aplica ao que a ação decide gravar. Uma ação customizada é uma
+  operação de negócio inteira, autorizada pelos `perfis` dela; ela pode gravar campos que
+  ninguém edita pela tela — é exatamente assim que `edicao: []` em `situacao` convive com
+  um `revogar` que a altera. Com `corpo: true`, o `edicao` continua valendo para o que
+  veio do formulário, na etapa de gravação descrita abaixo.
 - Log com `tabela.label`, no padrão de `11-monitoramento-faro.md`.
 - O que foi implementado a partir de cada `prompt` entra no relatório final
   (`orquestrador.md`).
+
+### Ação com `corpo`
+
+Com `corpo: true` a ação **grava o que veio da tela antes de aplicar a regra**, em uma
+requisição só (`01-yaml-contrato.md`). A gravação é a de `alterar`, não uma cópia dela:
+
+```java
+@Transactional
+@Secured(PerfisUsuario.ASSINANTE)
+public Edital assinar(@Valid Edital edital, Long id) {
+    // Grava o que veio da tela com as mesmas regras de alterar, edicao por perfil
+    // inclusive, e só então aplica a regra da ação.
+    Edital atual = aplicarAlteracao(edital, id);
+
+    if (atual.getSituacao() != SituacaoEdital.CONFERIDO) {
+        throw new ValidacaoException("Só é possível assinar um Edital aceito");
+    }
+
+    atual.setSituacao(SituacaoEdital.PUBLICADO);
+    atual.setAlteradoPor(securityService.getUserLogin().getLogin());
+    atual.setAlteradoEm(LocalDateTime.now());
+
+    log.info("Assinar Edital {}", atual.getNumero());
+
+    return repository.save(atual);
+}
+```
+
+- **Não duplicar `alterar`.** Extraia o preparo dela num método privado que devolve a
+  entidade pronta **sem gravar** — a validação do id, a reposição dos campos que o perfil
+  não edita, a auditoria — e chame o mesmo método nos dois lugares. Duplicar a reposição
+  de campos é o caminho mais curto para as duas divergirem.
+- **Uma transação só**: gravação e regra vivem no mesmo `@Transactional`, então a
+  pré-condição recusada desfaz a gravação junto. O usuário não perde o que digitou, que
+  segue na tela; o banco é que não fica com meio caminho andado.
+- A ordem importa: valide **depois** de repor os campos não editáveis, senão a validação
+  julga um valor que não vai ser gravado.
 
 ## Edição de campo por perfil
 

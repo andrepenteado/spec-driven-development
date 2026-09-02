@@ -374,6 +374,7 @@ português** que o service vai implementar:
 | `tela` | `cadastro` | Em que tela o botão aparece: `cadastro`, `pesquisa` ou `ambos`. |
 | `aba` | barra de botões | Aba do cadastro que recebe o botão. Não se aplica a `tela: pesquisa`. |
 | `confirmar` | `true` | Pede confirmação SweetAlert antes de executar. |
+| `corpo` | `false` | A ação recebe o registro no corpo da requisição e grava a tela antes de aplicar a regra. Só com `tela: cadastro`. |
 
 ### Nomes derivados
 
@@ -386,13 +387,18 @@ Para `tabela.nome: edital` e `nome: revogar`:
 | Método do service Angular | camelCase de `nome` | `revogar(id)` |
 | Chave no frontend | camelCase de `nome` | `acoesCustomizadas['revogar']` |
 
+Com `corpo: true` o registro entra na assinatura, antes do id: `revogar(Edital edital,
+Long id)` no service e `revogar(edital, id)` no service Angular. O endpoint e a chave
+não mudam.
+
 ### Regras
 
-- A ação opera sobre **um registro**, identificado pelo id. Sem parâmetros extras e sem
-  body: é um comando, não um formulário.
-- Ação que precisa de dado digitado **não é ação customizada**. Ou o dado é um campo do
-  CRUD, gravado pelo `alterar`, ou é uma tela própria. Manter o comando de um clique é
-  o que permite gerá-lo inteiro a partir do `prompt`.
+- A ação opera sobre **um registro**, identificado pelo id, e nunca recebe parâmetro
+  solto. Com `corpo: false`, o default, ela também não tem request body: é um comando,
+  não um formulário.
+- Ação que precisa de dado digitado que **não é campo do CRUD** não é ação customizada.
+  Ou o dado vira campo, ou a operação vira tela própria. O que a ação recebe é sempre o
+  próprio registro, nunca um payload desenhado para ela.
 - `nome` não pode ser `consultar`, `incluir`, `alterar`, `excluir`, `listar`, `buscar`
   nem `pesquisar`: colidiria com os métodos padrão. Nome repetido entre duas ações
   customizadas também é `invalido`.
@@ -409,6 +415,31 @@ Para `tabela.nome: edital` e `nome: revogar`:
   "Agrupamento por abas".
 - Como `tabela.acoes`, a ação customizada **é barreira de segurança**: `@Secured` no
   método do service (`04-backend-service.md`), não só botão escondido.
+
+### Ação que grava a tela (`corpo`)
+
+Há ação cuja pré-condição é um campo que o usuário **acabou de digitar na mesma tela** e
+que o perfil da ação edita: assinar um edital exige o nome e a função da assinatura,
+devolver exige a justificativa. Sem `corpo`, isso obriga dois cliques para um resultado
+só — `Gravar` e depois a ação —, e quem esquece o primeiro leva um erro de negócio
+falando de um campo que está preenchido na frente dele.
+
+`corpo: true` resolve sem inventar payload: o body é **a própria entidade do CRUD**, o
+mesmo objeto que o `PUT` de `alterar` recebe. O service grava com as regras de `alterar`,
+`edicao` por perfil inclusive, e só então aplica a regra do `prompt` — tudo na mesma
+transação, de modo que a pré-condição recusada desfaz também a gravação. O `prompt` deve
+dizer isso: primeiro grava o que veio da tela, depois aplica a regra.
+
+- O que a ação grava **por conta própria** continua fora do `edicao`: a `situacao` com
+  `edicao: []` é escrita pela ação, como sempre. O `edicao` filtra o que veio do
+  formulário, não o que a regra decide.
+- `corpo: true` exige `tela: cadastro`. Na pesquisa não há formulário aberto — o botão
+  vive na linha do grid e não haveria o que enviar. Com `tela: pesquisa` ou
+  `tela: ambos`, o YAML é `invalido`.
+- A tela valida o formulário antes de enviar, com a mesma mensagem de obrigatórios do
+  `Gravar` (`09-frontend-cadastro.md`).
+- Continua valendo o resto: `@Secured` com os `perfis` da ação, um endpoint só, e o
+  retorno é a entidade atualizada.
 
 ### O `prompt` e o que ele garante
 
@@ -1122,6 +1153,8 @@ arquivos:
   ou repetido, ou com `tela` fora de `cadastro`/`pesquisa`/`ambos`, é rejeitada.
 - Ação customizada com `aba` junto de `tela: pesquisa`, ou com `aba` que não
   corresponde a nenhuma aba do cadastro, é rejeitada.
+- `corpo` com valor fora de `true`/`false` é rejeitado.
+- `corpo: true` em ação com `tela` diferente de `cadastro` é rejeitado.
 - Propriedade estrutural dentro de `por-perfil` é rejeitada, `colunas-layout`
   incluído: a largura do campo é a mesma para todos os perfis.
 - Propriedade declarada em `por-perfil` sem estar em todos os perfis de

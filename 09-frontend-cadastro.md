@@ -573,9 +573,14 @@ um botão. Sem `aba`, ele fica na barra de botões, à direita, antes de `Voltar
 - Com `aba` declarada, o botão sai da barra e vai para **o fim do conteúdo daquela
   aba**, em `d-flex justify-content-end`, no lugar onde a aba de lista põe o
   `+ Adicionar`. É onde a ação pertence quando ela age sobre o que a aba mostra — um
-  `Assinar` na aba `Assinatura`, um `Conferir` na aba de conferência.
+  `Assinar` na aba `Assinatura`, um `Aceitar` na aba de conferência.
 - O botão continua **fora** de qualquer `<form>` aninhado e não é `type="submit"`: ele
   chama o service da ação, não o `gravar()` da tela.
+- Com `corpo: true` (`01-yaml-contrato.md`), o botão **valida o formulário antes de
+  confirmar**, com a mesma mensagem de obrigatórios do `gravar()`, e envia `this.form.value`
+  na chamada da ação. Continua não sendo `type="submit"`: quem grava é a ação, em uma
+  requisição só. É o que tira o `Gravar` obrigatório antes de um `Assinar` que exige campo
+  da própria tela.
 - Aba escondida para o perfil (todos os campos ocultos, ou lista sem `consultar`) leva
   o botão junto. Se a ação precisa ficar disponível de qualquer forma, declare-a sem
   `aba` — na barra de botões ela não depende de aba nenhuma.
@@ -675,5 +680,6 @@ um botão. Sem `aba`, ele fica na barra de botões, à direita, antes de `Voltar
 - Com configuração por perfil, existe uma única tela de cadastro para todos os perfis; o `FormGroup` tem todos os campos, nenhum controle é removido ou desabilitado, e aba sem campo visível não é renderizada.
 - `Gravar` só aparece para quem tem a ação do modo atual, e sem ela o formulário inteiro fica somente leitura.
 - Ação customizada com `tela` incluindo `cadastro` aparece na barra de botões, ou no fim da aba de `aba`, some em modo de inclusão, confirma antes e recarrega o registro no sucesso.
+- Ação com `corpo: true` valida o formulário e manda `this.form.value` no corpo da chamada.
 - Aba de lista respeita `lista.acoes`: sem `consultar` não existe, sem `incluir` não tem subformulário, sem `excluir` não tem botão de excluir.
 - Operações de buscar e gravar logam com `console.info` no padrão de `11-monitoramento-faro.md`.

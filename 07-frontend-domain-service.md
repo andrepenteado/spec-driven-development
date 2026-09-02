@@ -76,7 +76,7 @@ entidade referenciada para popular combo/switches, como qualquer FK.
 - Concatenar `${this.initConfig.urlBackend}${API_[NOME_TABELA_PLURAL]}` em cada método.
 - Não declarar `baseUrl`, `resourceUrl`, `/api` hardcoded nem chamada relativa pura.
 - Métodos: `listar()`, `buscar(id)`, `incluir(obj)`, `alterar(obj, id)`, `excluir(id)`.
-- Um método por ação customizada (`01-yaml-contrato.md`), com o nome em camelCase, dando `POST` em `${API}/${id}/[acao-kebab]` com body vazio e devolvendo a entidade atualizada.
+- Um método por ação customizada (`01-yaml-contrato.md`), com o nome em camelCase, dando `POST` em `${API}/${id}/[acao-kebab]` e devolvendo a entidade atualizada. Sem `corpo`, o body vai vazio e o método recebe só o id; com `corpo: true`, o body é a entidade e o método recebe `(obj, id)`.
 - Se houver pesquisa, criar `pesquisar(filtro)` chamando `GET /[nome-tabela-plural]/pesquisar`.
 - Pesquisa usa `HttpParams` com todos os campos preenchidos do objeto `filtro`.
 - Não usar parâmetros genéricos `campo` e `valor`.

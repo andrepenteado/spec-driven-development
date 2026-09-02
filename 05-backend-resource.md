@@ -28,15 +28,21 @@ Criar endpoints REST do CRUD.
 | `POST` | `/[nome-tabela-plural]` | `servico.incluir(obj)` |
 | `PUT` | `/[nome-tabela-plural]/{id}` | `servico.alterar(obj, id)` |
 | `DELETE` | `/[nome-tabela-plural]/{id}` | `servico.excluir(id)` |
-| `POST` | `/[nome-tabela-plural]/{id}/[acao-kebab]` | `servico.[acao](id)`, uma por ação customizada |
+| `POST` | `/[nome-tabela-plural]/{id}/[acao-kebab]` | `servico.[acao](id)`, ação customizada sem `corpo` |
+| `POST` | `/[nome-tabela-plural]/{id}/[acao-kebab]` | `servico.[acao](obj, id)`, ação customizada com `corpo: true` |
 
 Crie `/pesquisar` somente se houver campo pesquisável para algum perfil
 (`01-yaml-contrato.md`).
 
-Cada item de `tabela.acoes-customizadas` gera um `POST` em `/{id}/[acao-kebab]`, **sem
-request body**: a ação é um comando sobre um registro. `POST` porque muda estado sem
-ser substituição do recurso (`PUT`) nem edição de campo (`PATCH`). O retorno é a
-entidade atualizada. Receba `[NomeTabela]Filter filtro` por binding de query params, sem request body e sem parâmetros genéricos `campo`/`valor`.
+Cada item de `tabela.acoes-customizadas` gera um `POST` em `/{id}/[acao-kebab]`. Por
+default a ação vai **sem request body**: é um comando sobre um registro. Com `corpo: true`
+(`01-yaml-contrato.md`) ela recebe no body a entidade do CRUD, a mesma do `PUT` de
+`alterar`, e delega `servico.[acao](obj, id)` — sem DTO próprio e sem endpoint a mais.
+`POST` nos dois casos, porque muda estado sem ser substituição do recurso (`PUT`) nem
+edição de campo (`PATCH`). O retorno é a entidade atualizada.
+
+Em `/pesquisar`, receba `[NomeTabela]Filter filtro` por binding de query params, sem
+request body e sem parâmetros genéricos `campo`/`valor`.
 
 ## Listas (`tipo: lista`)
 
@@ -67,6 +73,7 @@ Criar `[NomeTabelaFilha]Resource`, com `@Observed` e os mesmos padrões de log:
 - Endpoints delegam ao service correto.
 - `/pesquisar` usa filter QueryDSL.
 - Não existe recebimento de usuário/autenticação para auditoria no resource.
-- Cada ação customizada tem um `POST /{id}/[acao]` que só delega ao service.
+- Cada ação customizada tem um `POST /{id}/[acao]` que só delega ao service, com body
+  apenas quando ela declara `corpo: true`.
 - Lista `agregado` não gerou nenhum endpoint; lista `independente` gerou os cinco
   acima, com a listagem em `por-[pai]/{id}`.
