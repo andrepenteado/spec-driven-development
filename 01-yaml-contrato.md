@@ -1136,7 +1136,16 @@ perfis: [CAIXA, GERENTE]
 arquivos:
   - backend/src/main/java/.../Pedido.java
   - backend/src/main/java/.../PedidoItem.java
+  - backend/src/test/java/.../PedidoServiceTest.java
+  - backend/src/test/java/.../PedidoServiceSegurancaTest.java
+testes:
+  comando-backend: "./mvnw test -Dtest='Pedido*Test'"
+  comando-frontend: "npm test -- --watch=false"
+  status: passou
 ```
+
+Os arquivos de teste entram em `arquivos`, junto dos demais, e o bloco `testes` registra
+como a suíte foi executada (`14-testes.md`). O manifesto só é criado com `status: passou`.
 
 ## Critérios de aceite
 

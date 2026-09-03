@@ -13,7 +13,7 @@ Definir regras globais para geração de CRUD.
 
 - Criar backend: Liquibase, domain, service e resource.
 - Criar frontend: rotas, menu, API, domain, service, pesquisa e cadastro.
-- Não criar testes.
+- Criar testes de backend e de frontend para o CRUD gerado, conforme `14-testes.md`.
 - Não alterar CRUD já gerado.
 
 ## Regras gerais
@@ -26,6 +26,9 @@ Definir regras globais para geração de CRUD.
 - Todo arquivo `.java` ou `.ts` criado deve iniciar com comentário contendo autor, data/hora pt_BR e observação de que foi criado com ajuda da IA.
 - Toda classe `.java` criada deve usar Javadoc na classe e nos métodos.
 - Preserve código existente e não sobrescreva arquivos não pertencentes ao CRUD.
+- Todo CRUD gerado é entregue com os testes que provam o que o YAML declara — ações por
+  perfil, regras de negócio, ações customizadas, `edicao` e auditoria. O detalhamento está
+  em `14-testes.md`; a suíte roda antes do manifesto `.generated.yaml`.
 
 ## Templates Angular
 
@@ -42,7 +45,7 @@ Regras válidas para toda tela gerada; as specs 08 e 09 não as repetem.
 
 Regras válidas para todo `@Component` gerado; as specs 08 e 09 não as repetem.
 
-- Declarar sempre `changeDetection: ChangeDetectionStrategy.Eager`. No Angular 22 o padrão passou a ser `OnPush`, e a migração `ng update` carimba `Eager` (equivalente ao antigo `Default`) em todos os componentes existentes justamente para preservar o comportamento. Sem o carimbo, a tela não reflete dados vindos de `subscribe` — e a falha é silenciosa: nenhum erro no console, nenhuma quebra de build, nenhum teste vermelho.
+- Declarar sempre `changeDetection: ChangeDetectionStrategy.Eager`. No Angular 22 o padrão passou a ser `OnPush`, e a migração `ng update` carimba `Eager` (equivalente ao antigo `Default`) em todos os componentes existentes justamente para preservar o comportamento. Sem o carimbo, a tela não reflete dados vindos de `subscribe` — e a falha é silenciosa: nenhum erro no console e nenhuma quebra de build. Quem acusa é o teste de comportamento da tela (`14-testes.md`), que verifica o DOM depois da emissão do service; teste que só olha o metadado do componente não pega.
 - **Nunca remover esse carimbo de um componente existente durante refactor.** É a única linha que separa a tela de funcionar e de congelar sem aviso.
 - Obrigatório inclusive no `AppComponent` raiz da aplicação: `Eager` só age quando a travessia de change detection **alcança** o componente, então uma raiz em `OnPush` congela toda a árvore abaixo dela, mesmo que os filhos declarem `Eager`.
 - `changeDetection` é metadado de `@Component` e **não é herdado**: estender `PesquisarBaseComponent`/`CadastroBaseComponent` não traz o carimbo da base — elas são `@Directive()`, que sequer aceita a propriedade. Cada tela declara o seu.
@@ -80,3 +83,5 @@ Regras:
 - Nenhum arquivo existente de outro CRUD foi sobrescrito.
 - Auditoria existe no banco, entidade, TypeScript e service do CRUD, e nas entidades filhas de lista somente quando `persistencia: independente`.
 - Resource não participa do preenchimento da auditoria.
+- Os testes de `14-testes.md` foram gerados para o CRUD e a suíte foi executada com sucesso
+  antes da criação do `.generated.yaml`.

@@ -17,7 +17,7 @@ Neste repositório, a spec funciona como uma camada de contrato entre:
 - o projeto consumidor, que recebe código gerado de forma mais consistente;
 - novos desenvolvedores, que podem consultar os padrões esperados antes de manter ou criar funcionalidades.
 
-O objetivo não é substituir análise técnica, revisão de código ou testes. O objetivo é reduzir ambiguidade, evitar geração inconsistente e tornar explícitas as decisões que normalmente ficariam espalhadas em conversas, prompts ou código já existente.
+O objetivo não é substituir análise técnica nem revisão de código — inclusive a revisão dos testes que a geração produz. O objetivo é reduzir ambiguidade, evitar geração inconsistente e tornar explícitas as decisões que normalmente ficariam espalhadas em conversas, prompts ou código já existente.
 
 ## Papel deste repositório
 
@@ -30,6 +30,7 @@ Ele pode ser usado para:
 - registrar a stack técnica usada nos projetos;
 - servir como material de onboarding para novos desenvolvedores;
 - documentar critérios mínimos de aceite antes de considerar uma geração concluída;
+- definir os testes automatizados que acompanham cada CRUD gerado;
 - separar documentação técnica compartilhada da documentação específica de cada produto.
 
 Nos projetos que usam esta spec, a recomendação é manter:
@@ -42,6 +43,32 @@ Nos projetos que usam esta spec, a recomendação é manter:
 A stack canônica está em `00-contexto-geral.md`, que é a versão lida pela IA. Em resumo: Java 25 + Spring Boot 4 no backend e Angular 22 no frontend.
 
 Essas tecnologias devem ser tratadas como padrão da documentação atual. Se um projeto consumidor divergir, a divergência deve estar documentada no próprio projeto ou refletida em uma variação desta spec.
+
+## Testes
+
+Teste faz parte da geração, não é etapa posterior. Todo CRUD gerado sai com testes de
+backend e de frontend escritos no mesmo comando, e a suíte é executada antes de o CRUD
+ser marcado como concluído — sem suíte verde não existe `.generated.yaml`.
+
+O critério de "suíte completa" não é percentual de cobertura, é **rastreabilidade**: cada
+coisa que o YAML declara tem um teste que prova que o sistema faz aquilo.
+
+- `tabela.acoes` e `lista.acoes`: para cada ação, o perfil autorizado executa e o perfil
+  negado recebe 403/`AccessDeniedException` sem chegar ao banco. É o teste que impede a
+  regressão mais cara do CRUD — a tela esconde o botão, o `@Secured` some num refactor e
+  a API fica aberta.
+- `por-perfil`: cada perfil enxerga o que foi declarado para ele, perfis somam permissões
+  e usuário sem perfil do CRUD fica sem ação e sem campo.
+- `regras` e `tabela.acoes-customizadas`: um teste do caminho em que a regra age e outro
+  do caminho em que ela recusa, nomeados com o `nome` declarado no YAML.
+- `edicao`: valor mandado por fora da tela é descartado, provando que a restrição é do
+  service e não só do formulário.
+- Auditoria, endpoints, filtros de pesquisa, listas, telas de pesquisa e cadastro,
+  services Angular e campos com máscara (`moeda`, `data`).
+
+As regras completas — o que testar, como, e o que **não** testar — estão em
+`14-testes.md`. A geração usa o framework de teste que o projeto já tem: nunca instala,
+troca nem inventa infraestrutura de teste.
 
 ## Estrutura
 
@@ -60,6 +87,7 @@ Essas tecnologias devem ser tratadas como padrão da documentação atual. Se um
 - `11-monitoramento-faro.md`: RUM dos frontends (Grafana Faro via lib `ngx-apcore`) e padrão de logs dos componentes.
 - `12-monitoramento-healthz.md`: healthz do nginx, probes do chart e observabilidade do backend (Tempo/Loki/Prometheus).
 - `13-remocao-secrets-backend.md`: playbook de remoção de segredos do working tree e do histórico git.
+- `14-testes.md`: testes obrigatórios do CRUD gerado — ações por perfil, regras, ações customizadas, `edicao`, auditoria, telas e services.
 - `templates/`: referências visuais executáveis para telas.
 - `.cruds/`: pasta do projeto consumidor para YAMLs operacionais de CRUD. Ela fica no repositório do consumidor, fora desta spec, para não misturar dados do projeto com a documentação compartilhada.
 
@@ -158,7 +186,7 @@ negócio do consumidor e documentação própria do produto não entram aqui.
 
 1. Adicione a pasta do clone deste repositório ao contexto da IA.
 2. Crie os YAMLs de CRUD em `.cruds/[nome-crud].yaml`, conforme `01-yaml-contrato.md`.
-3. Peça para a IA ler e seguir `orquestrador.md`. A IA valida e já implementa os CRUDs novos no mesmo comando.
+3. Peça para a IA ler e seguir `orquestrador.md`. A IA valida, implementa e testa os CRUDs novos no mesmo comando.
 
 O fluxo que a IA segue a partir daí — ordem de leitura das specs, validação, geração e manifesto — está definido em `orquestrador.md` e não é repetido aqui. Para gerar só um CRUD específico, nomeie o YAML no pedido.
 
@@ -169,7 +197,8 @@ Para executar a leitura geral dos CRUDs pendentes:
 ```text
 Leia e siga orquestrador.md como instrução principal para gerar CRUDs.
 Os YAMLs de entrada estão em .cruds/.
-Valide e implemente os CRUDs novos, reportando o que foi gerado ao final.
+Valide, implemente e teste os CRUDs novos, reportando o que foi gerado e o
+resultado da suíte ao final.
 ```
 
 Para um YAML específico:
@@ -177,10 +206,11 @@ Para um YAML específico:
 ```text
 Leia e siga orquestrador.md.
 Use o YAML .cruds/marca.yaml.
-Valide e implemente o CRUD, reportando o que foi gerado ao final.
+Valide, implemente e teste o CRUD, reportando o que foi gerado e o resultado da
+suíte ao final.
 ```
 
-Não há etapa de confirmação: a IA gera o código na mesma execução do prompt.
+Não há etapa de confirmação: a IA gera o código e os testes na mesma execução do prompt.
 
 ## Regras importantes
 
@@ -189,6 +219,7 @@ As regras de precedência e o que a IA não pode fazer estão em `orquestrador.m
 - A IA não sobrescreve CRUD já gerado e não altera arquivos fora do CRUD solicitado.
 - Configuração por perfil não gera mais de um CRUD: gera um só, com pesquisa e cadastro que se configuram conforme os perfis do usuário logado.
 - `tabela.acoes` é segurança de verdade (vira `@Secured` no service); `por-perfil` é apresentação.
+- Todo CRUD sai com testes, e a suíte precisa passar antes do `.generated.yaml`: CRUD com teste vermelho ou não executado é reportado como pendente, não como pronto.
 - YAMLs já executados devem ter o respectivo `.generated.yaml`; é ele que marca o CRUD como concluído.
 - Padrões reais do projeto consumidor prevalecem sobre os exemplos da spec, desde que não violem os critérios de aceite.
 

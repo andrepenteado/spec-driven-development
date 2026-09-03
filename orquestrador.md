@@ -40,12 +40,18 @@ Regras:
 8. `07-frontend-domain-service.md`
 9. `08-frontend-pesquisar.md`
 10. `09-frontend-cadastro.md`
-11. `10-checklist-final.md`
-12. `11-monitoramento-faro.md`
-13. `12-monitoramento-healthz.md`
-14. `13-remocao-secrets-backend.md`
+11. `14-testes.md`
+12. `10-checklist-final.md`
+13. `11-monitoramento-faro.md`
+14. `12-monitoramento-healthz.md`
+15. `13-remocao-secrets-backend.md`
 
-As specs 11 a 13 são padrões de módulo/plataforma (monitoramento e segredos):
+O número do arquivo é a ordem em que ele entrou na spec; a ordem de leitura é a desta
+lista. `14-testes.md` é regra **por CRUD** e vem antes do checklist final, porque é ele
+que fecha a geração.
+
+As specs `11-monitoramento-faro.md`, `12-monitoramento-healthz.md` e
+`13-remocao-secrets-backend.md` são padrões de módulo/plataforma (monitoramento e segredos):
 valem para o módulo como um todo, não por CRUD. Ler quando o trabalho tocar
 telemetria, healthz/probes, deploy ou segredos — na geração de CRUD, aplicar
 apenas o padrão de logs de `11-monitoramento-faro.md`.
@@ -59,8 +65,10 @@ apenas o padrão de logs de `11-monitoramento-faro.md`.
 5. Executar a geração na sequência, sem pedir confirmação e sem aguardar aprovação: todo CRUD com status `novo` é implementado no mesmo comando que disparou a leitura. O relatório do item 4 é informativo, não é um ponto de parada.
 6. Gerar apenas os CRUDs `novo`. CRUDs `existente`, `conflito` ou `invalido` não são gerados nem alterados: apenas relatados com o motivo. Se o usuário nomeou CRUDs específicos no pedido, gerar somente esses.
 7. Gerar backend, depois frontend.
-8. Criar `.cruds/[nome-crud].generated.yaml` apenas após sucesso.
-9. Informar arquivos criados/alterados, validações executadas, campos `obrigatorio: true` ocultos para algum perfil que possa incluir e **o que foi implementado a partir do `prompt` de cada `regra` e de cada ação customizada**.
+8. Gerar os testes de backend e de frontend do CRUD, conforme `14-testes.md`.
+9. Executar a suíte com os comandos do projeto. Falhando, corrigir o código gerado e rodar de novo; persistindo a falha, **não** criar o manifesto e relatar o CRUD como pendente, com a saída do teste.
+10. Criar `.cruds/[nome-crud].generated.yaml` apenas após sucesso, incluindo os arquivos de teste e o registro da execução.
+11. Informar arquivos criados/alterados, validações executadas, testes gerados com o resultado da suíte, campos `obrigatorio: true` ocultos para algum perfil que possa incluir e **o que foi implementado a partir do `prompt` de cada `regra` e de cada ação customizada**.
 
 ## Regras de precedência
 
@@ -77,4 +85,6 @@ apenas o padrão de logs de `11-monitoramento-faro.md`.
 - Cada campo `tipo: lista` gerou tabela e entidade filhas nos dois lados, com service e resource próprios apenas quando `persistencia: independente`, e nunca rota ou menu.
 - O CRUD é um só, parametrizado por perfil em tempo de execução, sem duplicar arquivo algum.
 - As ações de `tabela.acoes` chegaram ao `@Secured` do service, não só aos botões da tela.
-- O manifesto `.generated.yaml` foi criado somente depois da geração bem-sucedida.
+- Cada ação, regra e configuração por perfil declarada no YAML tem teste correspondente (`14-testes.md`).
+- A suíte de testes do CRUD foi executada e passou antes do manifesto.
+- O manifesto `.generated.yaml` foi criado somente depois da geração bem-sucedida e da suíte verde.
